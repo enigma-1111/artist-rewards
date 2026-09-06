@@ -47,6 +47,14 @@ h1 { font-weight: 500; font-size: clamp(28px, 6vw, 46px); line-height: 1.05; }
   border-radius: 999px; padding: 6px 10px;
 }
 .pill em { color: var(--chart); font-style: normal; }
+.connects {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+}
+.connects a {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12px; color: var(--chart); text-decoration: none;
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px;
+}
 .faces {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
