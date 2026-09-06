@@ -1,0 +1,13 @@
+{
+  "name": "Artist Rewards Token",
+  "ticker": "ART",
+  "site": "https://art-rewards.vercel.app",
+  "github": "https://github.com/enigma-1111/artist-rewards",
+  "x": "nft_art",
+  "contract": "",
+  "pair": "WETH",
+  "payout": "Both",
+  "feesToHolders": true,
+  "purpose": "Tip artists. Holders earn trading fees in ART and WETH.",
+  "bankr": "@bankrbot send 500 ART to @handle on robinhood chain"
+}
