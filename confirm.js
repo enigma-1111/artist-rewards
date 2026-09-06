@@ -12,6 +12,7 @@
     el.style.left = Math.min(ev.clientX + 12, innerWidth - 180) + "px";
     el.style.top = Math.min(ev.clientY + 12, innerHeight - 80) + "px";
   }
+
   function pick(t) {
     var handle = String((t && t.handle) || "").replace(/^@/, "");
     var address = (t && t.address) || "";
@@ -24,6 +25,7 @@
     }
     if (typeof renderMatches === "function") renderMatches(value);
     if (typeof writePrompt === "function") writePrompt();
+    if (typeof paintRecv === "function") paintRecv();
     if (typeof picked !== "undefined") {
       picked.kind = address ? "addr" : "x";
       picked.handle = handle;
@@ -39,32 +41,13 @@
     if (status) {
       status.className = "hint ok";
       status.textContent = address
-        ? "Receiver set. Copy the Bankr prompt or send."
-        : "Receiver set to @" + handle + ". Copy the Bankr prompt or send.";
+        ? "Receiver set to " + address.slice(0, 6) + "…" + address.slice(-4) + ". Confirm the logo."
+        : "Receiver set to @" + handle + ". Confirm the logo, then copy the Bankr prompt.";
     }
   }
+
   window.openConfirm = pick;
-  document.querySelectorAll(".face").forEach(function (el) {
-    var handle = el.dataset.handle;
-    var name = el.getAttribute("title") || handle;
-    el.addEventListener("click", function () {
-      hideHover();
-      pick({ name: name, handle: handle, address: "" });
-    });
-    el.addEventListener("pointerenter", function (ev) { showHover(ev, name, handle); });
-    el.addEventListener("pointerleave", hideHover);
-  });
-  document.querySelectorAll(".tile").forEach(function (el) {
-    el.addEventListener("click", function (ev) {
-      ev.preventDefault();
-      var nameEl = el.querySelector("strong");
-      pick({
-        name: el.dataset.name || (nameEl && nameEl.textContent) || "collection",
-        handle: el.dataset.handle,
-        address: ""
-      });
-    });
-  });
+
   var connects = document.querySelector(".connects");
   if (connects) {
     connects.addEventListener("click", function (e) {
@@ -78,12 +61,28 @@
       }
       if (act === "launch") {
         var d = document.getElementById("launch");
-        if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+        if (d) {
+          d.open = true;
+          d.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
       if (act === "nft") {
         var n = document.getElementById("nft");
-        if (n) { n.focus(); n.scrollIntoView({ behavior: "smooth", block: "center" }); }
+        if (n) {
+          n.focus();
+          n.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+      if (act === "profile") {
+        var pr = document.getElementById("profile");
+        if (pr) pr.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     });
+  }
+
+  var sheet = document.getElementById("sheet");
+  if (sheet) {
+    sheet.hidden = true;
+    sheet.classList.remove("on");
   }
 })();
