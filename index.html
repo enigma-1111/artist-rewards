@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>ART — Artist Rewards Token</title>
-  <meta name="description" content="Tip artists with $ART. Holders earn trading fees in ART and WETH." />
   <link rel="icon" href="logo.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="logo.svg" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="ui.css" />
 </head>
@@ -28,20 +26,13 @@
       <p class="lede">Tap a mark, confirm the receiver, copy the Bankr prompt.</p>
     </header>
     <section>
-      <div class="sec-row">
-        <div class="sec">Artists</div>
-        <div class="pager">
-          <button class="ghost tiny" id="facePrev" type="button">Prev</button>
-          <span id="facePager">1 / 1</span>
-          <button class="ghost tiny" id="faceNext" type="button">Next</button>
-        </div>
-      </div>
+      <div class="sec">Artists</div>
       <div class="faces" id="faces"></div>
     </section>
     <section class="card">
       <label>To</label>
       <div class="recv" id="recv">
-        <div class="recv-face" id="recvFace"><div class="ph">AR</div></div>
+        <div class="recv-face" id="recvFace"><div class="ph artmark"></div></div>
         <div>
           <strong id="recvName">Pick a receiver</strong>
           <span id="recvMeta">Tap a mark or paste @handle / 0x</span>
