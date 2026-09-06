@@ -1,228 +1,43 @@
-const CONFIG = {
-  name: "Artist Rewards Token",
-  ticker: "ART",
-  contract: "",
-  x: "nft_art",
-  pair: "WETH",
-  payout: "Both",
-  chainId: 4663
-};
-
-const ARTISTS = [
-  { name: "nft_art", handle: "nft_art", chain: "RH 4663" },
-  { name: "Beeple", handle: "beeple", chain: "ETH" },
-  { name: "Pak", handle: "muratpak", chain: "ETH" },
-  { name: "XCOPY", handle: "XCOPYART", chain: "ETH" },
-  { name: "FEWOCiOUS", handle: "fewocious", chain: "ETH" },
-  { name: "Refik Anadol", handle: "refikanadol", chain: "ETH" },
-  { name: "Tyler Hobbs", handle: "tylerxhobbs", chain: "ETH" },
-  { name: "Snowfro", handle: "Snowfro", chain: "ETH" },
-  { name: "Claire Silver", handle: "ClaireSilver12", chain: "ETH" },
-  { name: "Sofia Crespo", handle: "sofiacrespo", chain: "ETH" },
-  { name: "Grant Yun", handle: "grantyun", chain: "ETH" },
-  { name: "Hackatao", handle: "hackatao", chain: "ETH" },
-  { name: "Mad Dog Jones", handle: "mad_dog_jones", chain: "ETH" },
-  { name: "DeeKay", handle: "deekaymotion", chain: "ETH" },
-  { name: "Jack Butcher", handle: "jackbutcher", chain: "ETH" },
-  { name: "6529", handle: "punk6529", chain: "ETH" },
-  { name: "Frank", handle: "frankdegods", chain: "SOL / ETH" },
-  { name: "Luca Netz", handle: "LucaNetz", chain: "ETH / Abstract" },
-  { name: "Takashi Murakami", handle: "TakashiMurakami", chain: "ETH" },
-  { name: "Zancan", handle: "zancan", chain: "ETH" }
-];
-
-const PALETTE = [
-  ["#e23d28", "#3d6bff"],
-  ["#e6ff63", "#1a100e"],
-  ["#f0a58e", "#6b3cff"],
-  ["#3d6bff", "#e23d28"],
-  ["#f3ead7", "#8b1e3f"],
-  ["#6b3cff", "#e6ff63"]
-];
-
-const COLLECTIONS = [
-  { name: "CryptoPunks", chain: "ETH", url: "https://opensea.io/collection/cryptopunks" },
-  { name: "Fidenza", chain: "ETH · Art Blocks", url: "https://opensea.io/collection/fidenza-by-tyler-hobbs" },
-  { name: "XCOPY", chain: "ETH", url: "https://opensea.io/XCOPYART" },
-  { name: "Bored Ape Yacht Club", chain: "ETH", url: "https://opensea.io/collection/boredapeyachtclub" },
-  { name: "Pudgy Penguins", chain: "ETH", url: "https://opensea.io/collection/pudgypenguins" },
-  { name: "Art Blocks", chain: "ETH", url: "https://opensea.io/collection/art-blocks" },
-  { name: "Chromie Squiggle", chain: "ETH", url: "https://opensea.io/collection/chromie-squiggle-by-snowfro" },
-  { name: "Azuki", chain: "ETH", url: "https://opensea.io/collection/azuki" },
-  { name: "DeGods", chain: "SOL / ETH", url: "https://opensea.io/collection/degods" },
-  { name: "Mad Lads", chain: "SOL", url: "https://www.tensor.trade/trade/mad_lads" },
-  { name: "Checks", chain: "ETH", url: "https://opensea.io/collection/vv-checks" },
-  { name: "NodeMonkes", chain: "BTC", url: "https://magiceden.io/ordinals/marketplace/nodemonkes" }
-];
-
-const $ = (id) => document.getElementById(id);
-const who = $("who");
-const amt = $("amt");
-const promptEl = $("prompt");
-const matchesEl = $("matches");
-const statusEl = $("status");
-let picked = { kind: "x", handle: "artist", address: "", label: "artist" };
-
-function explorerToken() {
-  return CONFIG.contract ? "https://explorer.robinhood.com/token/" + CONFIG.contract : "";
-}
-function poolsToken() {
-  return CONFIG.contract ? "https://pools.fun/token/" + CONFIG.contract : "";
-}
-
-function paintToken() {
-  const line = $("tokenLine");
-  const links = $("tokenLinks");
-  if (!CONFIG.contract) {
-    line.textContent = "No contract yet. You launch on pools.fun. Then send the 0x and it goes here.";
-    links.innerHTML = '<a href="https://pools.fun/?tab=top" target="_blank" rel="noreferrer">Open pools.fun</a>';
-    return;
-  }
-  line.innerHTML = CONFIG.ticker + " · <span class='ok'>" + CONFIG.contract + "</span>";
-  links.innerHTML =
-    '<a href="' + poolsToken() + '" target="_blank" rel="noreferrer">Trade / claim on pools.fun</a>' +
-    '<a href="' + explorerToken() + '" target="_blank" rel="noreferrer">Explorer</a>';
-}
-
-function extractHandle(s) {
-  const t = s.trim();
-  const x = t.match(/(?:x\.com|twitter\.com)\/@?([A-Za-z0-9_]{1,15})/i);
-  if (x) return x[1];
-  const at = t.match(/^@?([A-Za-z0-9_]{1,15})$/);
-  if (at) return at[1];
-  return "";
-}
-function extractOpensea(s) {
-  const t = s.trim();
-  const m = t.match(/opensea\.io\/(?:os\/)?([A-Za-z0-9._-]+)/i);
-  if (!m) return "";
-  const slug = m[1];
-  if (["assets", "collection", "collections", "rankings", "activity"].includes(slug.toLowerCase())) return "";
-  return slug;
-}
-function extractAddr(s) {
-  const m = s.trim().match(/0x[a-fA-F0-9]{40}/);
-  return m ? m[0] : "";
-}
-
-function cardHTML(id, title, sub, extra) {
-  const ph = (title || "?").replace("@", "").slice(0, 2).toUpperCase();
-  return (
-    '<div class="match" data-id="' + id + '">' +
-      '<div class="ph">' + ph + "</div>" +
-      "<div><strong>" + title + "</strong><span>" + sub + (extra ? " · " + extra : "") + "</span></div>" +
-    "</div>"
-  );
-}
-
-function renderMatches(raw) {
-  const addr = extractAddr(raw);
-  const handle = extractHandle(raw);
-  const os = extractOpensea(raw);
-  const cards = [];
-  if (addr) {
-    cards.push({ id: "addr", kind: "addr", handle: "", address: addr, html: cardHTML("addr", addr.slice(0, 6) + "…" + addr.slice(-4), "Wallet", "0x") });
-  }
-  if (handle) {
-    cards.push({ id: "x", kind: "x", handle: handle, address: "", html: cardHTML("x", "@" + handle, "X profile", "confirm this account") });
-  }
-  if (os && !os.startsWith("0x")) {
-    cards.push({ id: "os", kind: "os", handle: os, address: addr || "", html: cardHTML("os", os, "OpenSea profile", "copy the 0x if you have it") });
-  } else if (!addr && !handle && raw.trim().length >= 2) {
-    const guess = raw.trim().replace(/^@/, "");
-    cards.push({ id: "x", kind: "x", handle: guess, address: "", html: cardHTML("x", "@" + guess, "Treat as X handle", "tap to confirm") });
-    cards.push({ id: "os", kind: "os", handle: guess, address: "", html: cardHTML("os", guess, "Treat as OpenSea username", "better to paste the URL") });
-  }
-  matchesEl.innerHTML = cards.map((c) => c.html).join("");
-  window.__cards = cards;
-  if (cards[0]) select(cards[0].id);
-  else {
-    picked = { kind: "x", handle: "artist", address: "", label: "artist" };
-    writePrompt();
-  }
-  matchesEl.querySelectorAll(".match").forEach((el) => {
-    el.addEventListener("click", () => select(el.dataset.id));
-  });
-}
-
-function select(id) {
-  const cards = window.__cards || [];
-  const c = cards.find((x) => x.id === id) || cards[0];
-  if (!c) return;
-  picked = c;
-  matchesEl.querySelectorAll(".match").forEach((el) => el.classList.toggle("on", el.dataset.id === id));
-  writePrompt();
-}
-
-function recipient() {
-  if (picked.kind === "addr" && picked.address) return picked.address;
-  if (picked.handle) return "@" + String(picked.handle).replace(/^@/, "");
-  return "@artist";
-}
-
-function writePrompt() {
-  const amount = (amt.value || "500 ART").trim();
-  const line = "@bankrbot send " + amount + " to " + recipient() + " on robinhood chain";
-  promptEl.textContent = line;
-  return line;
-}
-
-function paintRails() {
-  $("artists").innerHTML = ARTISTS.map((a, i) => {
-    const [c1, c2] = PALETTE[i % PALETTE.length];
-    const letters = a.name.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase() || "AR";
-    return (
-      '<button class="tile" type="button" data-handle="' + a.handle + '">' +
-        '<div class="art" style="--a:' + c1 + ';--b:' + c2 + '">' + letters + "</div>" +
-        '<div class="meta"><strong>' + a.name + '</strong><small>@' + a.handle + ' · ' + a.chain + '</small></div>' +
-      "</button>"
-    );
-  }).join("");
-  $("artists").querySelectorAll(".tile").forEach((el) => {
-    el.addEventListener("click", () => {
-      who.value = "@" + el.dataset.handle;
-      renderMatches(who.value);
-      who.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  });
-  $("collections").innerHTML = COLLECTIONS.map((c, i) => {
-    const [c1, c2] = PALETTE[(i + 2) % PALETTE.length];
-    const letters = c.name.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase();
-    return (
-      '<a class="tile" href="' + c.url + '" target="_blank" rel="noreferrer">' +
-        '<div class="art" style="--a:' + c1 + ';--b:' + c2 + '">' + letters + "</div>" +
-        '<div class="meta"><strong>' + c.name + '</strong><small>' + c.chain + '</small></div>' +
-      "</a>"
-    );
-  }).join("");
-}
-
-$("chips").addEventListener("click", (e) => {
-  const b = e.target.closest(".amt");
-  if (!b) return;
-  $("chips").querySelectorAll(".amt").forEach((x) => x.classList.remove("on"));
-  b.classList.add("on");
-  amt.value = b.dataset.v;
-  writePrompt();
-});
-who.addEventListener("input", () => renderMatches(who.value));
-amt.addEventListener("input", writePrompt);
-$("copy").addEventListener("click", async () => {
-  const line = writePrompt();
-  try {
-    await navigator.clipboard.writeText(line);
-    statusEl.textContent = "Copied. Paste into Bankr Terminal or tweet at @bankrbot.";
-    statusEl.className = "hint ok";
-  } catch {
-    statusEl.textContent = "Copy failed — select the prompt and copy it yourself.";
-    statusEl.className = "hint warn";
-  }
-});
-$("tweet").addEventListener("click", () => {
-  window.open("https://x.com/intent/tweet?text=" + encodeURIComponent(writePrompt()), "_blank", "noopener");
-});
-
-paintToken();
-paintRails();
-renderMatches("");
-writePrompt();
+const CONFIG={name:"Artist Rewards Token",ticker:"ART",contract:"",x:"nft_art",pair:"WETH",payout:"Both",chainId:4663,chainHex:"0x1237",chainName:"Robinhood Chain",rpc:"https://rpc.mainnet.chain.robinhood.com",explorer:"https://explorer.robinhood.com",decimals:18};
+const PALETTE=[["#e23d28","#3d6bff"],["#e6ff63","#1a100e"],["#f0a58e","#6b3cff"],["#3d6bff","#e23d28"],["#f3ead7","#8b1e3f"],["#6b3cff","#e6ff63"]];
+const ARTISTS=[["nft_art","nft_art"],["Beeple","beeple"],["Pak","muratpak"],["XCOPY","XCOPYART"],["FEWOCiOUS","fewocious"],["Refik Anadol","refikanadol"],["Tyler Hobbs","tylerxhobbs"],["Snowfro","Snowfro"],["Claire Silver","ClaireSilver12"],["Sofia Crespo","sofiacrespo"],["Grant Yun","grantyun"],["Hackatao","hackatao"],["Mad Dog Jones","mad_dog_jones"],["DeeKay","deekaymotion"],["Jack Butcher","jackbutcher"],["6529","punk6529"],["Frank","frankdegods"],["Luca Netz","LucaNetz"],["Takashi Murakami","TakashiMurakami"],["Zancan","zancan"],["William Mapan","williammapan"],["Emily Xie","emilyxie_"],["Monica Rizzolli","monicarizzolli"],["Dmitri Cherniak","dmitricherniak"],["Larva Labs","larvalabs"],["Dom Hofmann","dhof"],["Justin Aversano","justinaversano"],["Coldie","coldie"],["ROBNESS","RobnessOfficial"],["IX Shells","ixshells"],["Slimesunday","slimesunday"],["Josie Bellini","JosieBellini"],["Sarah Zucker","thesarahzucker"],["Fvckrender","fvckrender"],["Android Jones","androidjones"],["Blake Kathryn","blakekathryn"],["Osinachi","osinachiart"],["Casey Reas","REAS"],["Matt DesLauriers","mattdesl"],["Botto","bottoproject"],["Holly Herndon","hollyherndon"],["Andres Reisinger","andresreisinger"],["Daniel Arsham","danielarsham"],["KAWS","kaws"],["GMUNK","gmunk"],["AL Simpson","MissALSimpson"],["Artnome","artnome"],["Shantell Martin","shantell_martin"],["James Jean","jamesjeanart"],["Loish","loish"],["Amber Vittoria","AmberVittoria"],["Trevor Jones","trevorjonesart"],["piter pasma","piterpasma"],["manoloide","manoloide"],["Kjetil Golid","kjetilgolid"],["Jeff Davis","jeffdavis"],["Helena Sarin","HelenaSarin"],["Charlotte Fang","CharlotteFang77"],["gremplin","gremplin"],["Yuga Labs","yugalabs"],["pplpleasr","pplpleasr1"],["0xDesigner","0xDesigner"],["Cozomo","CozomoMedici"],["Sewer","sewerart"],["OSF","osf_nft"],["Art Blocks","artblocks_io"],["aeforia","aeforia"],["Kidmograph","kidmograph"],["Seerlight","seerlight"]];
+const COLLECTIONS=[{name:"CryptoPunks",chain:"Ethereum",handle:"cryptopunksnfts",url:"https://opensea.io/collection/cryptopunks"},{name:"Fidenza",chain:"Art Blocks",handle:"tylerxhobbs",url:"https://opensea.io/collection/fidenza-by-tyler-hobbs"},{name:"XCOPY",chain:"Ethereum",handle:"XCOPYART",url:"https://opensea.io/XCOPYART"},{name:"Bored Ape Yacht Club",chain:"Ethereum",handle:"BoredApeYC",url:"https://opensea.io/collection/boredapeyachtclub"},{name:"Pudgy Penguins",chain:"Ethereum",handle:"pudgypenguins",url:"https://opensea.io/collection/pudgypenguins"},{name:"Art Blocks",chain:"Ethereum",handle:"artblocks_io",url:"https://opensea.io/collection/art-blocks"},{name:"Chromie Squiggle",chain:"Ethereum",handle:"Snowfro",url:"https://opensea.io/collection/chromie-squiggle-by-snowfro"},{name:"Azuki",chain:"Ethereum",handle:"AzukiOfficial",url:"https://opensea.io/collection/azuki"},{name:"DeGods",chain:"Solana / Ethereum",handle:"DeGodsNFT",url:"https://opensea.io/collection/degods"},{name:"Mad Lads",chain:"Solana",handle:"MadLadsNFT",url:"https://www.tensor.trade/trade/mad_lads"},{name:"Checks",chain:"Ethereum",handle:"jackbutcher",url:"https://opensea.io/collection/vv-checks"},{name:"NodeMonkes",chain:"Bitcoin",handle:"NodeMonkes",url:"https://magiceden.io/ordinals/marketplace/nodemonkes"}];
+const $=id=>document.getElementById(id);
+const who=$("who"),amt=$("amt"),promptEl=$("prompt"),matchesEl=$("matches"),statusEl=$("status"),connectBtn=$("connect"),sendBtn=$("send");
+let picked={kind:"x",handle:"artist",address:""},account="";
+function avatar(h){return "https://unavatar.io/twitter/"+encodeURIComponent(h)+"?fallback=false"}
+function initials(n){return String(n||"AR").replace(/[^A-Za-z0-9]/g,"").slice(0,2).toUpperCase()||"AR"}
+function explorerToken(){return CONFIG.contract?CONFIG.explorer+"/token/"+CONFIG.contract:""}
+function poolsToken(){return CONFIG.contract?"https://pools.fun/token/"+CONFIG.contract:""}
+function paintToken(){const line=$("tokenLine"),links=$("tokenLinks");if(!CONFIG.contract){line.textContent="No contract yet. Launch on pools.fun, then send the 0x.";links.innerHTML='<a href="https://pools.fun/?tab=top" target="_blank" rel="noreferrer">Open pools.fun</a>';return;}line.innerHTML=CONFIG.ticker+" \u00b7 <span class='ok'>"+CONFIG.contract.slice(0,6)+"\u2026"+CONFIG.contract.slice(-4)+"</span>";links.innerHTML='<a href="'+poolsToken()+'" target="_blank" rel="noreferrer">Trade / claim on pools.fun</a><a href="'+explorerToken()+'" target="_blank" rel="noreferrer">Explorer</a>';}
+function extractHandle(s){const t=s.trim();const x=t.match(/(?:x\.com|twitter\.com)\/@?([A-Za-z0-9_]{1,15})/i);if(x)return x[1];const at=t.match(/^@?([A-Za-z0-9_]{1,15})$/);return at?at[1]:""}
+function extractOpensea(s){const m=s.trim().match(/opensea\.io\/(?:os\/)?([A-Za-z0-9._-]+)/i);if(!m)return"";const slug=m[1];if(["assets","item","collection","collections","rankings","activity"].includes(slug.toLowerCase()))return"";return slug}
+function extractAddr(s){const m=String(s).match(/0x[a-fA-F0-9]{40}/);return m?m[0]:""}
+function parseNft(raw){const t=raw.trim();let m=t.match(/opensea\.io\/(?:assets|item)\/([a-z0-9-]+)\/(0x[a-fA-F0-9]{40})\/(\d+)/i);if(m)return{chain:m[1].toLowerCase(),contract:m[2],tokenId:m[3]};m=t.match(/(0x[a-fA-F0-9]{40})\s*[\/# ]\s*(\d+)/);if(m)return{chain:"ethereum",contract:m[1],tokenId:m[2]};return null}
+function cardHTML(id,title,sub,extra,handle){const ph=initials(title);const img=handle?'<img src="'+avatar(handle)+'" alt="" onerror="this.outerHTML=\'<div class=ph>'+ph+'</div>\'">':'<div class="ph">'+ph+'</div>';return '<div class="match" data-id="'+id+'">'+img+'<div><strong>'+title+'</strong><span>'+sub+(extra?' \u00b7 '+extra:'')+'</span></div></div>'}
+function renderMatches(raw){const addr=extractAddr(raw),handle=extractHandle(raw),os=extractOpensea(raw),nft=parseNft(raw),cards=[];if(nft)lookupNft(raw);if(addr)cards.push({id:"addr",kind:"addr",handle:"",address:addr,html:cardHTML("addr",addr.slice(0,6)+"\u2026"+addr.slice(-4),"Wallet","ready to send","")});if(handle)cards.push({id:"x",kind:"x",handle,address:"",html:cardHTML("x","@"+handle,"X profile","Bankr can send to the linked wallet",handle)});if(os&&!os.startsWith("0x")&&!addr)cards.push({id:"os",kind:"os",handle:os,address:"",html:cardHTML("os",os,"OpenSea profile","paste their 0x to send from this page",os)});else if(!addr&&!handle&&!nft&&raw.trim().length>=2){const guess=raw.trim().replace(/^@/,"");cards.push({id:"x",kind:"x",handle:guess,address:"",html:cardHTML("x","@"+guess,"Treat as X handle","tap to confirm",guess)})}matchesEl.innerHTML=cards.map(c=>c.html).join("");window.__cards=cards;if(cards[0])select(cards[0].id);else writePrompt();matchesEl.querySelectorAll(".match").forEach(el=>el.addEventListener("click",()=>select(el.dataset.id)))}
+function select(id){const cards=window.__cards||[];const c=cards.find(x=>x.id===id)||cards[0];if(!c)return;picked=c;matchesEl.querySelectorAll(".match").forEach(el=>el.classList.toggle("on",el.dataset.id===id));writePrompt()}
+function recipient(){if(picked.kind==="addr"&&picked.address)return picked.address;if(picked.handle)return "@"+String(picked.handle).replace(/^@/,"");return "@artist"}
+function writePrompt(){const amount=(amt.value||"500 ART").trim();const line="@bankrbot send "+amount+" to "+recipient()+" on robinhood chain";promptEl.textContent=line;return line}
+function paintFaces(){const seen=new Set();const list=ARTISTS.filter(([,h])=>{const k=h.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,69);$("faces").innerHTML=list.map(([name,handle],i)=>{const [c1,c2]=PALETTE[i%PALETTE.length];return '<button class="face" type="button" data-handle="'+handle+'" title="'+name+'"><img src="'+avatar(handle)+'" alt="'+name+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'"><div class="ph" style="display:none;--a:'+c1+';--b:'+c2+'">'+initials(name)+'</div></button>'}).join("");$("faces").querySelectorAll(".face").forEach(el=>el.addEventListener("click",()=>{$("faces").querySelectorAll(".face").forEach(x=>x.classList.remove("on"));el.classList.add("on");who.value="@"+el.dataset.handle;renderMatches(who.value);$("amt").scrollIntoView({behavior:"smooth",block:"center"})}))}
+function paintCollections(){$("collections").innerHTML=COLLECTIONS.map((c,i)=>{const [c1,c2]=PALETTE[(i+2)%PALETTE.length];return '<a class="tile" href="'+c.url+'" target="_blank" rel="noreferrer"><img src="'+avatar(c.handle)+'" alt="'+c.name+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'"><div class="art" style="display:none;--a:'+c1+';--b:'+c2+'">'+initials(c.name)+'</div><div class="meta"><strong>'+c.name+'</strong><small>'+c.chain+'</small></div></a>'}).join("")}
+function setStatus(msg,kind){statusEl.textContent=msg;statusEl.className="hint"+(kind?" "+kind:"")}
+function shortAddr(a){return a.slice(0,6)+"\u2026"+a.slice(-4)}
+async function ensureChain(eth){try{await eth.request({method:"wallet_switchEthereumChain",params:[{chainId:CONFIG.chainHex}]})}catch(err){if(err&&err.code===4902){await eth.request({method:"wallet_addEthereumChain",params:[{chainId:CONFIG.chainHex,chainName:CONFIG.chainName,nativeCurrency:{name:"ETH",symbol:"ETH",decimals:18},rpcUrls:[CONFIG.rpc],blockExplorerUrls:[CONFIG.explorer]}]})}else throw err}}
+async function connect(){const eth=window.ethereum;if(!eth){setStatus("No wallet in this browser. Use Robinhood Wallet, Rabby, or MetaMask \u2014 or Copy Bankr tip.","warn");return}try{const accs=await eth.request({method:"eth_requestAccounts"});account=(accs&&accs[0])||"";await ensureChain(eth);connectBtn.textContent=account?shortAddr(account):"Connect wallet";setStatus(account?"Wallet connected. Send uses $ART once the token is live.":"",account?"ok":"")}catch(err){setStatus(err&&err.message?err.message:"Connect cancelled.","warn")}}
+function parseArtAmount(raw){const t=String(raw).trim();if(t.startsWith("$"))return{kind:"usd",value:t};const n=t.replace(/,/g,"").match(/([0-9]+(?:\.[0-9]+)?)/);return{kind:"token",value:n?n[1]:"0"}}
+function toUnits(amount){const [w,f=""]=String(amount).split(".");const frac=(f+"000000000000000000").slice(0,CONFIG.decimals);return BigInt(w+frac).toString(16)}
+async function sendArt(){if(!CONFIG.contract){setStatus("Token is not live yet. Copy the Bankr line for later, or launch first.","warn");return}const to=picked.address||extractAddr(who.value);if(!to){setStatus("On-site send needs a 0x address. Use Copy Bankr for @handles, or resolve an NFT holder first.","warn");return}const parsed=parseArtAmount(amt.value);if(parsed.kind==="usd"){setStatus("Wallet send needs a token amount (100 ART), not $5. Use Bankr for dollar tips.","warn");return}if(!window.ethereum){setStatus("Connect a wallet first.","warn");return}if(!account)await connect();if(!account)return;try{const eth=window.ethereum;await ensureChain(eth);const units=toUnits(parsed.value);const data="0xa9059cbb"+to.slice(2).toLowerCase().padStart(64,"0")+units.padStart(64,"0");const hash=await eth.request({method:"eth_sendTransaction",params:[{from:account,to:CONFIG.contract,data}]});setStatus("Sent. "+hash.slice(0,10)+"\u2026","ok")}catch(err){setStatus(err&&err.message?err.message:"Send failed.","warn")}}
+const RPCS={ethereum:"https://ethereum.publicnode.com",eth:"https://ethereum.publicnode.com",base:"https://mainnet.base.org"};
+async function ownerOf(chain,contract,tokenId){const rpc=RPCS[chain]||RPCS.ethereum;const idHex=BigInt(tokenId).toString(16).padStart(64,"0");const data="0x6352211e"+idHex;const res=await fetch(rpc,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"eth_call",params:[{to:contract,data},"latest"]})});const json=await res.json();const hex=json&&json.result;if(!hex||hex==="0x")throw new Error("No owner on this item");return "0x"+hex.slice(-40)}
+async function lookupNft(raw){const parsed=parseNft(raw||$("nft").value);const box=$("nftOut");if(!parsed){box.innerHTML='<p class="hint warn">Need an item link like opensea.io/item/ethereum/0x\u2026/123 or 0xcontract / 123.</p>';return}box.innerHTML='<p class="hint">Looking up current holder\u2026</p>';try{const owner=await ownerOf(parsed.chain,parsed.contract,parsed.tokenId);who.value=owner;renderMatches(owner);box.innerHTML='<div class="match on"><div class="ph">0x</div><div><strong>'+shortAddr(owner)+'</strong><span>Current holder \u00b7 ready to tip</span></div></div>';setStatus("Holder found. Confirm and send or copy Bankr.","ok")}catch(err){box.innerHTML='<p class="hint warn">'+(err.message||"Could not read owner. Try Ethereum item links.")+'</p>'}}
+connectBtn.addEventListener("click",connect);
+sendBtn.addEventListener("click",sendArt);
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".amt");if(!b)return;$("chips").querySelectorAll(".amt").forEach(x=>x.classList.remove("on"));b.classList.add("on");amt.value=b.dataset.v;writePrompt()});
+who.addEventListener("input",()=>renderMatches(who.value));
+amt.addEventListener("input",writePrompt);
+$("nft").addEventListener("change",()=>lookupNft());
+$("copy").addEventListener("click",async()=>{const line=writePrompt();try{await navigator.clipboard.writeText(line);setStatus("Copied. Paste into Bankr or tweet at @bankrbot.","ok")}catch{setStatus("Copy failed \u2014 select the prompt and copy it yourself.","warn")}});
+$("tweet").addEventListener("click",()=>window.open("https://x.com/intent/tweet?text="+encodeURIComponent(writePrompt()),"_blank","noopener"));
+if(window.ethereum){window.ethereum.request({method:"eth_accounts"}).then(accs=>{if(accs&&accs[0]){account=accs[0];connectBtn.textContent=shortAddr(account)}}).catch(()=>{});}
+paintToken();paintFaces();paintCollections();renderMatches("");writePrompt();
