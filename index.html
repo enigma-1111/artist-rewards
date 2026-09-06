@@ -7,156 +7,83 @@
   <meta name="description" content="Tip artists with $ART. Holders earn trading fees in ART and WETH." />
   <link rel="icon" href="logo.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="logo.svg" />
-  <meta property="og:title" content="ART — Artist Rewards Token" />
-  <meta property="og:image" content="https://art-rewards.vercel.app/logo.svg" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="ui.css" />
 </head>
 <body>
   <div class="page">
     <nav class="nav">
       <div class="brand">
         <img class="logo" src="logo.svg" width="36" height="36" alt="ART" />
-        <div>
-          <strong>ART</strong>
-          <small>Artist Rewards</small>
+        <div><strong>ART</strong><small>Artist Rewards</small></div>
+      </div>
+      <div class="nav-links">
+        <a class="on" href="index.html">Tip</a>
+        <a href="profile.html">Profile</a>
+        <button class="ghost" id="connect" type="button">Connect</button>
+      </div>
+    </nav>
+    <header>
+      <h1>Tip an artist</h1>
+      <p class="lede">Tap a mark, confirm the receiver, copy the Bankr prompt.</p>
+    </header>
+    <section>
+      <div class="sec-row">
+        <div class="sec">Artists</div>
+        <div class="pager">
+          <button class="ghost tiny" id="facePrev" type="button">Prev</button>
+          <span id="facePager">1 / 1</span>
+          <button class="ghost tiny" id="faceNext" type="button">Next</button>
         </div>
       </div>
-      <button class="ghost" id="connect" type="button">Connect wallet</button>
-    </nav>
-
-    <header>
-      <h1>Artist Rewards Token</h1>
-      <p class="lede">Tip artists with $ART. Holders earn 90% of trading fees in both $ART and WETH. Tap a face to set the receiver, pick an amount, then copy the Bankr prompt.</p>
-      <div class="pills">
-        <div class="pill">Pair <em>WETH</em></div>
-        <div class="pill">Payout <em>Both</em></div>
-        <div class="pill">Fees to holders <em>On</em></div>
-      </div>
-      <div class="connects">
-        <button type="button" class="chip" data-act="tip" data-handle="nft_art" data-name="nft_art">X @nft_art</button>
-        <button type="button" class="chip" data-act="bankr">Bankr prompt</button>
-        <button type="button" class="chip" data-act="launch">Launch steps</button>
-        <button type="button" class="chip" data-act="nft">NFT holder</button>
-        <button type="button" class="chip" data-act="profile">Artistry profile</button>
-      </div>
-    </header>
-
-    <section>
-      <div class="sec">Top artists · tap to tip</div>
       <div class="faces" id="faces"></div>
     </section>
-
-    <div class="grid">
-      <section class="card">
-        <label for="who">To</label>
-        <div class="recv" id="recv">
-          <div class="recv-face" id="recvFace"><div class="ph">AR</div></div>
-          <div>
-            <strong id="recvName">Pick a receiver</strong>
-            <span id="recvMeta">Tap a face or paste @handle / 0x. The logo is the confirmed receiver.</span>
-          </div>
+    <section class="card">
+      <label>To</label>
+      <div class="recv" id="recv">
+        <div class="recv-face" id="recvFace"><div class="ph">AR</div></div>
+        <div>
+          <strong id="recvName">Pick a receiver</strong>
+          <span id="recvMeta">Tap a mark or paste @handle / 0x</span>
         </div>
-        <input id="who" autocomplete="off" spellcheck="false" placeholder="0x…  /  @handle  /  X, OpenSea, or NFT link" />
-        <p class="hint">Wallet, social profile, or an NFT page. Confirm the logo before you copy the Bankr prompt.</p>
-        <div id="matches"></div>
-      </section>
-
-      <section class="card">
-        <label for="amt">Amount</label>
-        <div class="row" id="chips">
-          <button class="amt" data-v="100 ART">100 ART</button>
-          <button class="amt on" data-v="500 ART">500 ART</button>
-          <button class="amt" data-v="1000 ART">1,000 ART</button>
-          <button class="amt" data-v="$5 of ART">$5</button>
-        </div>
-        <input id="amt" value="500 ART" style="margin-top:10px" />
-        <div class="prompt" id="prompt">@bankrbot send 500 ART to @artist on robinhood chain</div>
-        <div class="row" style="margin-top:12px">
-          <button class="go" id="copy">Copy Bankr tip</button>
-          <button class="ghost" id="tweet" type="button">Copy again</button>
-        </div>
-        <div class="row">
-          <button class="go send" id="send" type="button">Send from wallet</button>
-        </div>
-        <p class="hint" id="status"></p>
-      </section>
-    </div>
-
-    <section class="card" style="margin-top:18px">
-      <label for="nft">Send to the holder of an NFT</label>
-      <input id="nft" autocomplete="off" spellcheck="false" placeholder="Paste OpenSea item link or contract / token id" />
-      <p class="hint">Works on all EVM-chain artists. Paste an item link or contract / token id. We read the current holder, then you tip that address.</p>
+      </div>
+      <input id="who" autocomplete="off" spellcheck="false" placeholder="@handle or 0x…" />
+      <div id="matches"></div>
+    </section>
+    <section class="card" style="margin-top:14px">
+      <label for="amt">Amount</label>
+      <div class="row" id="chips">
+        <button class="amt" data-v="100 ART">100</button>
+        <button class="amt on" data-v="500 ART">500</button>
+        <button class="amt" data-v="1000 ART">1,000</button>
+        <button class="amt" data-v="$5 of ART">$5</button>
+      </div>
+      <input id="amt" value="500 ART" style="margin-top:10px" />
+      <div class="prompt" id="prompt">@bankrbot send 500 ART to @artist on robinhood chain</div>
+      <div class="row" style="margin-top:12px">
+        <button class="go" id="copy">Copy Bankr prompt</button>
+        <button class="go send" id="send" type="button">Send</button>
+      </div>
+      <p class="hint" id="status"></p>
+    </section>
+    <section class="card" style="margin-top:14px">
+      <label for="nft">Or tip an NFT holder</label>
+      <input id="nft" autocomplete="off" spellcheck="false" placeholder="OpenSea item link or contract / token id" />
+      <p class="hint">Works on all EVM-chain artists.</p>
       <div id="nftOut"></div>
     </section>
-
     <section class="rail-wrap">
       <div class="sec">Collections</div>
       <div class="rail" id="collections"></div>
     </section>
-
-    <section class="card" id="profile" style="margin-top:18px">
-      <label>Artistry profile</label>
-      <div class="recv">
-        <div class="recv-face" id="profFace"><div class="ph">AR</div></div>
-        <div>
-          <strong>Your artist page</strong>
-          <span>Connect any time — before or after a tip. Link the profiles Bankr can reach.</span>
-        </div>
-      </div>
-      <input id="profWallet" style="margin-top:10px" placeholder="Wallet 0x…" />
-      <input id="profX" style="margin-top:8px" placeholder="@handle Bankr can send to" />
-      <input id="profOs" style="margin-top:8px" placeholder="OpenSea profile or other social" />
-      <div class="row">
-        <button class="ghost" id="profUseWallet" type="button">Use connected wallet</button>
-        <button class="go" id="profSave" type="button">Save profile</button>
-      </div>
-      <p class="hint">$ART received: <em id="profReceived">— until $ART is live</em></p>
-      <p class="hint soon">Coming soon — selected art, collections, and a public artist page. Not built yet.</p>
-    </section>
-
-    <section class="card lore" style="margin-top:18px">
-      <label>Lore</label>
-      <p class="hint">ART is a tipping token for working artists. Trade it. Hold it. Send it. Holders earn 90% of the pool’s trading fees in both $ART and WETH. A tip is a direct pay — no marketplace cut, no listing, no “gm” that never clears.</p>
-      <p class="hint">Culture can live on any chain. Settlement for $ART is Robinhood Chain. Paste a wallet, an X profile, or an EVM NFT. If you paste an NFT, we resolve the current holder and you tip that address.</p>
-    </section>
-
-    <section class="card" style="margin-top:14px">
-      <label>How people use it</label>
-      <ol class="steps">
-        <li>Tap a face (or paste a wallet / @handle / NFT link).</li>
-        <li>Pick an amount. Copy the Bankr prompt.</li>
-        <li>Holders keep earning fees while the token trades. Artists get paid in the same asset collectors hold.</li>
-      </ol>
-    </section>
-
-    <section class="card" style="margin-top:18px">
-      <label>Token</label>
-      <p id="tokenLine" class="hint">No contract yet. Launch on pools.fun, then send the 0x.</p>
-      <div class="links" id="tokenLinks"></div>
-    </section>
-
-    <details id="launch">
-      <summary>Launch on pools.fun</summary>
-      <ol class="steps">
-        <li>Open <strong>pools.fun</strong> → Launch a token</li>
-        <li>Name: <strong>Artist Rewards Token</strong></li>
-        <li>Ticker: <strong>ART</strong></li>
-        <li>X URL: <strong>https://x.com/nft_art</strong></li>
-        <li>Pool pairing: <strong>WETH</strong></li>
-        <li>Send fees to holders: <strong>On</strong></li>
-        <li>Pay holders in: <strong>Both</strong></li>
-        <li>Dev buy: <strong>.024</strong> if you still want ~1%, then Launch</li>
-      </ol>
-    </details>
-
     <footer>
-      Draft site. Not affiliated with the artists or collections shown.
-      Tips stay on this page. By @nft_art.
+      Holders earn 90% of fees in $ART and WETH. Draft site. Not affiliated.
+      <a href="profile.html">Artist profile</a>
     </footer>
   </div>
   <div id="hover" class="hover" hidden></div>
   <script src="app.js"></script>
-  <script src="images.js"></script>
+  <script src="faces.js"></script>
   <script src="confirm.js"></script>
 </body>
 </html>

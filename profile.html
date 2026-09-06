@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Artistry profile — ART</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <div class="brand">
+        <img class="logo" src="logo.svg" width="36" height="36" alt="ART" />
+        <div><strong>ART</strong><small>Artist Rewards</small></div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Tip</a>
+        <a class="on" href="profile.html">Profile</a>
+        <button class="ghost" id="connect" type="button">Connect</button>
+      </div>
+    </nav>
+    <header>
+      <h1>Artistry profile</h1>
+      <p class="lede">Connect any time. Link the wallet and handles Bankr can reach.</p>
+    </header>
+    <section class="card">
+      <div class="recv">
+        <div class="recv-face" id="profFace"><div class="ph">AR</div></div>
+        <div>
+          <strong>Your artist page</strong>
+          <span>Saved on this device until the token is live.</span>
+        </div>
+      </div>
+      <input id="profWallet" style="margin-top:10px" placeholder="Wallet 0x…" />
+      <input id="profX" style="margin-top:8px" placeholder="@handle Bankr can send to" />
+      <input id="profOs" style="margin-top:8px" placeholder="OpenSea or other social" />
+      <div class="row">
+        <button class="ghost" id="profUseWallet" type="button">Use connected wallet</button>
+        <button class="go" id="profSave" type="button">Save profile</button>
+      </div>
+      <p class="hint">$ART received: <em id="profReceived">— until $ART is live</em></p>
+    </section>
+    <section class="card" style="margin-top:14px">
+      <label>Coming soon</label>
+      <p class="hint">Selected art, collections, and a public artist page. Not built yet.</p>
+    </section>
+    <p class="hint" id="status"></p>
+    <footer><a href="index.html">Back to tip</a></footer>
+  </div>
+  <script src="profile.js"></script>
+</body>
+</html>
