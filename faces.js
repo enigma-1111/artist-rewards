@@ -7,6 +7,9 @@
     Snowfro: "https://artblocks-mainnet.s3.amazonaws.com/0.png",
     tylerxhobbs: "https://artblocks-mainnet.s3.amazonaws.com/78000027.png"
   };
+  function unavatar(handle) {
+    return "https://unavatar.io/twitter/" + encodeURIComponent(handle) + "?fallback=false";
+  }
   function hashHue(str) {
     var h = 0; str = String(str || "");
     for (var i = 0; i < str.length; i++) h = (h * 33 + str.charCodeAt(i)) >>> 0;
@@ -16,11 +19,36 @@
     var seed = hashHue(handle);
     var a = PALETTE[seed % PALETTE.length][0];
     var b = PALETTE[(seed + 3) % PALETTE.length][1];
-    return '<div class="ph artmark" style="--a:' + a + ";--b:" + b + '"></div>';
+    return '<div class="ph artmark" style="display:none;--a:' + a + ";--b:" + b + '"></div>';
   }
+  window.avErr = function (el) {
+    var h = el.getAttribute("data-h") || "";
+    var n = +(el.getAttribute("data-n") || 0);
+    var next = [];
+    if (FACE[h] && el.src.indexOf("larvalabs") < 0 && el.src.indexOf("artblocks") < 0) next.push(FACE[h]);
+    next.push("https://unavatar.io/x/" + encodeURIComponent(h) + "?fallback=false");
+    if (n < next.length) {
+      el.setAttribute("data-n", String(n + 1));
+      el.src = next[n];
+      return;
+    }
+    el.style.display = "none";
+    if (el.nextElementSibling) el.nextElementSibling.style.display = "grid";
+  };
   function tile(handle, name) {
-    if (FACE[handle]) return '<img src="' + FACE[handle] + '" alt="' + name + '">';
-    return blob(handle);
+    var first = FACE[handle] || unavatar(handle);
+    return (
+      '<img data-h="' + handle + '" data-n="0" src="' + first + '" alt="' + name + '" onerror="window.avErr(this)">' +
+      blob(handle)
+    );
+  }
+  function setRecv(handle, name) {
+    var rf = document.getElementById("recvFace");
+    if (rf) rf.innerHTML = tile(handle, name);
+    var rn = document.getElementById("recvName");
+    if (rn) rn.textContent = "@" + handle;
+    var rm = document.getElementById("recvMeta");
+    if (rm) rm.textContent = name + " \u00b7 confirm, then copy the Bankr prompt";
   }
   window.paintFaces = function () {
     var box = document.getElementById("faces");
@@ -39,13 +67,8 @@
       el.addEventListener("click", function () {
         box.querySelectorAll(".face").forEach(function (x) { x.classList.remove("on"); });
         el.classList.add("on");
+        setRecv(el.dataset.handle, el.title);
         if (typeof openConfirm === "function") openConfirm({ name: el.title, handle: el.dataset.handle, address: "" });
-        var rf = document.getElementById("recvFace");
-        if (rf) rf.innerHTML = el.innerHTML;
-        var rn = document.getElementById("recvName");
-        if (rn) rn.textContent = "@" + el.dataset.handle;
-        var rm = document.getElementById("recvMeta");
-        if (rm) rm.textContent = el.title + " \u00b7 confirm, then copy the Bankr prompt";
       });
     });
   };
