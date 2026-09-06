@@ -1,1 +1,115 @@
-<placeholder-will-replace>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ART — Artist Rewards Token</title>
+  <meta name="description" content="Tip artists with $ART. Holders earn trading fees in ART and WETH." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23e23d28'/><text x='16' y='22' text-anchor='middle' font-size='13' font-family='Georgia' fill='%23f3ead7'>AR</text></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div class="hero-grid" aria-hidden="true">
+        <span style="--a:#e23d28;--b:#f0a58e"></span>
+        <span style="--a:#3d6bff;--b:#1a100e"></span>
+        <span style="--a:#e6ff63;--b:#8b1e3f"></span>
+        <span style="--a:#f3ead7;--b:#e23d28"></span>
+        <span style="--a:#6b3cff;--b:#2a1410"></span>
+        <span style="--a:#e23d28;--b:#3d6bff"></span>
+      </div>
+      <div class="hero-label">Artist Rewards · culture map</div>
+    </div>
+
+    <header>
+      <div class="brand">
+        <div class="mark">AR</div>
+        <div class="kicker">Robinhood Chain · 4663</div>
+      </div>
+      <h1>Artist Rewards Token</h1>
+      <p class="lede">Tip artists with $ART. Holders earn 90% of trading fees in both $ART and WETH. One page. Any chain culture. Tips settle on Robinhood Chain.</p>
+      <div class="pills">
+        <div class="pill">Pair <em>WETH</em></div>
+        <div class="pill">Payout <em>Both</em></div>
+        <div class="pill">Fees to holders <em>On</em></div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <label for="who">Who are you tipping?</label>
+        <input id="who" autocomplete="off" spellcheck="false" placeholder="0x…  /  @handle  /  OpenSea or X link" />
+        <p class="hint">Paste a wallet or profile, or tap an artist below. Confirm the card, then copy the Bankr line.</p>
+        <div id="matches"></div>
+      </section>
+
+      <section class="card">
+        <label for="amt">Amount</label>
+        <div class="row" id="chips">
+          <button class="amt" data-v="100 ART">100 ART</button>
+          <button class="amt on" data-v="500 ART">500 ART</button>
+          <button class="amt" data-v="1000 ART">1,000 ART</button>
+          <button class="amt" data-v="$5 of ART">$5</button>
+        </div>
+        <input id="amt" value="500 ART" style="margin-top:10px" />
+        <p class="hint">Bankr min ~$0.05. You must hold $ART. Their handle needs a Bankr wallet.</p>
+        <div class="prompt" id="prompt">@bankrbot send 500 ART to @artist on robinhood chain</div>
+        <div class="row" style="margin-top:12px">
+          <button class="go" id="copy">Copy Bankr tip</button>
+          <button class="ghost" id="tweet" type="button">Open X</button>
+        </div>
+        <p class="hint" id="status"></p>
+      </section>
+    </div>
+
+    <section class="rail-wrap">
+      <div class="sec">Artists · tap to tip</div>
+      <div class="rail" id="artists"></div>
+    </section>
+
+    <section class="rail-wrap">
+      <div class="sec">Collections · all chains</div>
+      <div class="rail" id="collections"></div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <label>Token</label>
+      <p id="tokenLine" class="hint">No contract yet. You launch on pools.fun. Then send the 0x and it goes here.</p>
+      <div class="links" id="tokenLinks"></div>
+    </section>
+
+    <details>
+      <summary>Launch this on pools.fun (8 clicks)</summary>
+      <ol class="steps">
+        <li>Open <strong>pools.fun</strong> → Launch a token</li>
+        <li>Name: <strong>Artist Rewards Token</strong></li>
+        <li>Ticker: <strong>ART</strong></li>
+        <li>X URL: <strong>https://x.com/nft_art</strong></li>
+        <li>Pool pairing: <strong>WETH</strong></li>
+        <li>Send fees to holders: <strong>On</strong></li>
+        <li>Pay holders in: <strong>Both</strong></li>
+        <li>Dev buy: <strong>.024</strong> if you still want ~1%, then Launch</li>
+      </ol>
+      <p class="warn">Both is permanent. After it is live, send the 0x.</p>
+    </details>
+
+    <details>
+      <summary>How people use it</summary>
+      <ol class="steps">
+        <li>Buy $ART on pools.fun (WETH pair).</li>
+        <li>Hold. Fees stream as $ART + WETH. Claim on the token page.</li>
+        <li>Tip: tweet or paste the Bankr line this page copies.</li>
+        <li>Artists who hold also earn the fee stream.</li>
+      </ol>
+    </details>
+
+    <footer>
+      Draft site. Not affiliated with the artists or collections shown — culture map only.
+      $ART after launch is the contract on chain 4663, not the ticker.
+      By <a href="https://x.com/nft_art">@nft_art</a>.
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
