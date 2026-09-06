@@ -49,24 +49,27 @@ h1 { font-weight: 500; font-size: clamp(28px, 6vw, 46px); line-height: 1.05; }
 .pill em { color: var(--chart); font-style: normal; }
 .faces {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-  gap: 6px;
-  margin: 8px 0 18px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+  margin: 6px 0 14px;
+}
+@media (max-width: 420px) {
+  .faces { grid-template-columns: repeat(9, 1fr); }
 }
 .face {
   aspect-ratio: 1;
-  border: 0; padding: 0; border-radius: 12px; overflow: hidden;
+  border: 0; padding: 0; border-radius: 8px; overflow: hidden;
   background: #2a1612; cursor: pointer; position: relative;
 }
 .face img, .face .ph {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .face .ph {
-  display: grid; place-items: center; font-size: 11px; font-weight: 700;
+  display: grid; place-items: center; font-size: 8px; font-weight: 700;
   color: var(--paper);
   background: linear-gradient(160deg, var(--a, #e23d28), var(--b, #3d6bff));
 }
-.face.on { outline: 2px solid var(--chart); outline-offset: 1px; }
+.face.on { outline: 2px solid var(--chart); outline-offset: 0; }
 .grid { display: grid; gap: 14px; margin-top: 8px; grid-template-columns: 1fr; }
 @media (min-width: 860px) {
   .grid { grid-template-columns: 1.1fr .9fr; align-items: start; }
