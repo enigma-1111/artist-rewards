@@ -23,7 +23,7 @@
     </nav>
     <header>
       <h1>Artist Rewards Token</h1>
-      <p class="lede">Tip artists with $ART. Holders earn 90% of trading fees in both $ART and WETH. Tap a face or a collection to confirm the receiver. Nothing leaves this page.</p>
+      <p class="lede">Tip artists with $ART. Holders earn 90% of trading fees in both $ART and WETH. Tap a face to set the receiver, pick an amount, then copy the Bankr prompt.</p>
       <div class="pills">
         <div class="pill">Pair <em>WETH</em></div>
         <div class="pill">Payout <em>Both</em></div>
@@ -44,7 +44,7 @@
       <section class="card">
         <label for="who">To</label>
         <input id="who" autocomplete="off" spellcheck="false" placeholder="0x…  /  @handle  /  X, OpenSea, or NFT link" />
-        <p class="hint">Paste a wallet or profile. Tap a face to confirm who you are paying.</p>
+        <p class="hint">Tap a face above, or paste a wallet / @handle. The To box is the receiver.</p>
         <div id="matches"></div>
       </section>
       <section class="card">
@@ -58,7 +58,7 @@
         <input id="amt" value="500 ART" style="margin-top:10px" />
         <div class="prompt" id="prompt">@bankrbot send 500 ART to @artist on robinhood chain</div>
         <div class="row" style="margin-top:12px">
-          <button class="go" id="copy">Copy Bankr tip</button>
+          <button class="go" id="copy">Copy Bankr prompt</button>
           <button class="ghost" id="tweet" type="button">Copy again</button>
         </div>
         <div class="row">
@@ -70,7 +70,7 @@
     <section class="card" style="margin-top:18px">
       <label for="nft">Send to the holder of an NFT</label>
       <input id="nft" autocomplete="off" spellcheck="false" placeholder="Paste OpenSea item link or contract / token id" />
-      <p class="hint">Works on all EVM-chain artists. We read the current holder, then you confirm that 0x.</p>
+      <p class="hint">Works on all EVM-chain artists. We read the current holder, then you tip that address.</p>
       <div id="nftOut"></div>
     </section>
     <section class="rail-wrap">
@@ -79,13 +79,13 @@
     </section>
     <section class="card lore" style="margin-top:18px">
       <label>Lore</label>
-      <p class="hint">ART is a tipping token for working artists. Holders earn 90% of trading fees in $ART and WETH. Every tap on this page stays here and builds a tip.</p>
+      <p class="hint">ART is a tipping token for working artists. Holders earn 90% of trading fees in $ART and WETH.</p>
     </section>
     <section class="card" style="margin-top:14px">
       <label>How people use it</label>
       <ol class="steps">
-        <li>Tap a face or collection. Confirm the receiver card.</li>
-        <li>Copy the Bankr prompt, or send from a wallet once the token is live.</li>
+        <li>Tap a face (or paste a wallet / @handle / NFT link).</li>
+        <li>Pick an amount. Copy the Bankr prompt.</li>
         <li>Holders keep earning fees. Artists get paid in the same asset.</li>
       </ol>
     </section>
@@ -109,19 +109,7 @@
     </details>
     <footer>Draft site. Not affiliated with the artists or collections shown. Tips stay on this page. By @nft_art.</footer>
   </div>
-  <div id="hover" class="hover" hidden></div>
-  <div id="sheet" class="sheet" hidden>
-    <div class="sheet-card">
-      <button class="sheet-x" id="sheetX" type="button" aria-label="Close">×</button>
-      <div class="sheet-who" id="sheetWho"></div>
-      <p class="hint" id="sheetMeta"></p>
-      <p class="hint" id="sheetWarn"></p>
-      <div class="row">
-        <button class="go" id="sheetUse" type="button">Confirm receiver</button>
-        <button class="ghost" id="sheetCopy" type="button">Copy Bankr</button>
-      </div>
-    </div>
-  </div>
+  <div id="hover" class="hover"></div>
   <script src="app.js"></script>
   <script src="confirm.js"></script>
 </body>
