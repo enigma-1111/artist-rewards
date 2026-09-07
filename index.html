@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>ART — Artist Rewards Token</title>
+  <meta name="description" content="Tip artists with $ART. Holders earn trading fees in ART and WETH." />
   <link rel="icon" href="logo.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="logo.svg" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="ui.css" />
 </head>
@@ -21,14 +23,17 @@
         <button class="ghost" id="connect" type="button">Connect</button>
       </div>
     </nav>
+
     <header>
       <h1>Tip an artist</h1>
-      <p class="lede">Tap a mark, confirm the receiver, copy the Bankr prompt.</p>
+      <p class="lede">Tap a face, confirm the receiver, copy the Bankr prompt. Holders earn 90% of fees in $ART and WETH.</p>
     </header>
+
     <section>
       <div class="sec">Artists</div>
       <div class="faces" id="faces"></div>
     </section>
+
     <section class="card">
       <label>To</label>
       <div class="recv" id="recv">
@@ -41,6 +46,7 @@
       <input id="who" autocomplete="off" spellcheck="false" placeholder="@handle or 0x…" />
       <div id="matches"></div>
     </section>
+
     <section class="card" style="margin-top:14px">
       <label for="amt">Amount</label>
       <div class="row" id="chips">
@@ -57,18 +63,21 @@
       </div>
       <p class="hint" id="status"></p>
     </section>
+
     <section class="card" style="margin-top:14px">
       <label for="nft">Or tip an NFT holder</label>
       <input id="nft" autocomplete="off" spellcheck="false" placeholder="OpenSea item link or contract / token id" />
       <p class="hint">Works on all EVM-chain artists.</p>
       <div id="nftOut"></div>
     </section>
+
     <section class="rail-wrap">
       <div class="sec">Collections</div>
       <div class="rail" id="collections"></div>
     </section>
+
     <footer>
-      Holders earn 90% of fees in $ART and WETH. Draft site. Not affiliated.
+      Holders earn 90% of fees in $ART and WETH. Culture map only — not affiliated with any listed artist or collection.
       <a href="profile.html">Artist profile</a>
     </footer>
   </div>
