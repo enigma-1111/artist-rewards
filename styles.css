@@ -114,8 +114,12 @@ button {
   border-radius: 12px; padding: 12px 14px; font-size: 14px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-.amt { background: #160e0c; color: var(--paper); border: 1px solid var(--line); }
+.amt {
+  background: #160e0c; color: var(--paper); border: 1px solid var(--line);
+  min-height: 44px; min-width: 44px; flex: 1 1 auto; padding: 10px 12px;
+}
 .amt.on { border-color: var(--chart); color: var(--chart); }
+.amt:focus-visible { outline: 2px solid var(--chart); outline-offset: 2px; }
 .go { background: var(--red); color: var(--paper); flex: 1; }
 .go.send { background: #3d6bff; }
 .go:disabled { opacity: .45; cursor: not-allowed; }
