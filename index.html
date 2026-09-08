@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1a100e" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>ART — Artist Rewards Token</title>
-  <meta name="description" content="Tip artists with $ART. Holders earn trading fees in ART and WETH." />
+  <meta name="description" content="Tip a handle with $ART. Culture map only — not affiliated with any listed artist or collection. Holders earn 90% of fees in ART and WETH." />
   <link rel="icon" href="logo.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="logo.svg" />
   <link rel="stylesheet" href="styles.css" />
@@ -28,7 +28,8 @@
 
     <header>
       <h1>Tip an artist</h1>
-      <p class="lede">Tap a face, confirm the receiver, copy the Bankr prompt. Holders earn 90% of fees in $ART and WETH.</p>
+      <p class="lede">Tap a still, confirm the receiver, copy the Bankr prompt. Holders earn 90% of fees in $ART and WETH when the token is live.</p>
+      <p class="map-note">Culture map only. These stills name handles you can tip — ART is not affiliated with any listed artist or collection.</p>
     </header>
 
     <section>
@@ -45,7 +46,7 @@
         <span>Collections</span>
         <button type="button" class="chip" id="shuffleCols" aria-label="Shuffle collections">Shuffle</button>
       </div>
-      <p class="hint" id="collMeta" aria-live="polite">Culture map. Tap a still — same tip path as an artist. Not affiliated.</p>
+      <p class="hint" id="collMeta" aria-live="polite">Culture map. Same tip path as an artist. Not affiliated.</p>
       <div class="faces" id="collections"></div>
     </section>
 
@@ -90,8 +91,9 @@
     </section>
 
     <footer>
-      Holders earn 90% of fees in $ART and WETH. Culture map only — not affiliated with any listed artist or collection.
-      <a href="profile.html">Artist profile</a>
+      <p>Culture map only. Names and stills are a tip directory, not partners or official pages.</p>
+      <p>ART is not affiliated with any listed artist or collection. Holders earn 90% of pool fees in $ART and WETH after launch.</p>
+      <p><a href="profile.html">Your profile</a></p>
     </footer>
   </div>
   <div id="hover" class="hover" hidden></div>
