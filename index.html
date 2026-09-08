@@ -79,9 +79,12 @@
 
     <section class="card" style="margin-top:14px">
       <label for="nft">Or tip an NFT holder</label>
-      <input id="nft" autocomplete="off" spellcheck="false" placeholder="OpenSea item link or contract / token id" />
-      <p class="hint">Works on all EVM-chain artists.</p>
-      <div id="nftOut"></div>
+      <input id="nft" autocomplete="off" spellcheck="false" placeholder="OpenSea item link or 0x / token id" aria-describedby="nftHint" />
+      <div class="row" style="margin-top:10px">
+        <button type="button" class="ghost" id="nftGo">Look up holder</button>
+      </div>
+      <p class="hint" id="nftHint">Paste an item link. Shows the current holder, or a clear miss. ERC-721 only.</p>
+      <div id="nftOut" aria-live="polite"></div>
     </section>
 
     <footer>
