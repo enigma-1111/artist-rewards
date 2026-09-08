@@ -80,7 +80,7 @@
   });
 
   var connects = document.querySelector(".connects");
-  if (connects) {
+  if (connects && typeof connects.addEventListener === "function") {
     connects.addEventListener("click", function (e) {
       var b = e.target.closest("[data-act]");
       if (!b) return;
