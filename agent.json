@@ -2,6 +2,8 @@
   "name": "Artist Rewards Token",
   "ticker": "ART",
   "site": "https://art-rewards.vercel.app",
+  "profile": "https://art-rewards.vercel.app/profile.html",
+  "catalog": "https://art-rewards.vercel.app/catalog.json",
   "github": "https://github.com/enigma-1111/artist-rewards",
   "x": "nft_art",
   "contract": "",
@@ -10,5 +12,10 @@
   "feesToHolders": true,
   "purpose": "Tip a handle with ART. Culture map only — not affiliated with any listed artist or collection. Holders earn trading fees in ART and WETH.",
   "bankr": "@bankrbot send 500 ART to @handle on robinhood chain",
-  "mcp": "https://art-rewards.vercel.app/api/mcp"
+  "mcp": "https://art-rewards.vercel.app/api/mcp",
+  "mcpAlt": "https://art-rewards.vercel.app/mcp",
+  "pages": ["/", "/profile.html"],
+  "affiliation": "none",
+  "note": "Human launches on pools.fun and pastes the 0x. Contract stays empty until then.",
+  "lookalike": "ScanHood ticker ART at 0xa5bc127b167bD5B89E161838799B1bDdfD0697c4 is a different token named Robinhood ART. Do not paste that 0x."
 }
