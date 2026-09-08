@@ -512,7 +512,7 @@ function paintToken() {
     links.innerHTML = "";
   }
 }
-if (connectBtn) connectBtn.addEventListener("click", connect);
+/* Connect tap belongs to connect.js wallet sheet — do not inject here. */
 if (sendBtn) sendBtn.addEventListener("click", sendArt);
 if ($("chips")) $("chips").addEventListener("click", (e) => {
   const b = e.target.closest(".amt");

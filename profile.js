@@ -133,6 +133,6 @@
     } catch (err) {}
   }
   if (use) use.addEventListener("click", connectWallet);
-  if (connect) connect.addEventListener("click", connectWallet);
+  /* Nav Connect is owned by connect.js (overlay sheet). */
   draw();
 })();
