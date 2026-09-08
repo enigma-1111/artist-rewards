@@ -96,8 +96,10 @@
     el.addEventListener("click", function () {
       document.querySelectorAll("#faces .face, #collections .face").forEach(function (x) {
         x.classList.remove("on");
+        x.setAttribute("aria-pressed", "false");
       });
       el.classList.add("on");
+      el.setAttribute("aria-pressed", "true");
       var kind = el.dataset.kind || "artist";
       setRecv(el.dataset.handle, el.title, el.dataset.img, kind);
       if (typeof openConfirm === "function") {
@@ -145,8 +147,10 @@
       el.dataset.kind = kind || "artist";
       el.title = row.name || row.handle;
       el.setAttribute("aria-label", (row.name || row.handle) + (kind === "collection" ? " collection" : ""));
+      el.setAttribute("aria-pressed", "false");
       if (pickedHandle() && String(row.handle).toLowerCase() === pickedHandle()) {
         el.classList.add("on");
+        el.setAttribute("aria-pressed", "true");
       }
       var img = document.createElement("img");
       img.alt = el.title;
