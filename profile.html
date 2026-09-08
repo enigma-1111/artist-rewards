@@ -22,29 +22,39 @@
       </div>
     </nav>
     <header>
-      <h1>Artistry profile</h1>
-      <p class="lede">Connect any time. Link the wallet and handles Bankr can reach.</p>
+      <h1>Your page</h1>
+      <p class="lede">Saved on this phone. Bankr tips the X handle you paste. $ART received stays blank until the token is live.</p>
     </header>
     <section class="card">
       <div class="recv">
         <div class="recv-face" id="profFace"><div class="ph">AR</div></div>
         <div>
-          <strong>Your artist page</strong>
-          <span>Saved on this device until the token is live.</span>
+          <strong id="profName">Not set</strong>
+          <span id="profSub">Add a handle so people can tip you</span>
         </div>
       </div>
-      <input id="profWallet" style="margin-top:10px" placeholder="Wallet 0x…" />
-      <input id="profX" style="margin-top:8px" placeholder="@handle Bankr can send to" />
-      <input id="profOs" style="margin-top:8px" placeholder="OpenSea or other social" />
+      <label for="profX">X handle</label>
+      <input id="profX" autocomplete="off" spellcheck="false" placeholder="@handle Bankr can send to" />
+      <label for="profWallet" style="margin-top:12px">Wallet</label>
+      <input id="profWallet" autocomplete="off" spellcheck="false" placeholder="0x…" />
+      <label for="profOs" style="margin-top:12px">OpenSea or site</label>
+      <input id="profOs" autocomplete="off" spellcheck="false" placeholder="opensea.io/… or your site" />
       <div class="row">
         <button class="ghost" id="profUseWallet" type="button">Use connected wallet</button>
-        <button class="go" id="profSave" type="button">Save profile</button>
+        <button class="go" id="profSave" type="button">Save</button>
       </div>
       <p class="hint">$ART received: <em id="profReceived">— until $ART is live</em></p>
     </section>
     <section class="card" style="margin-top:14px">
-      <label>Coming soon</label>
-      <p class="hint">Selected art, collections, and a public artist page. Not built yet.</p>
+      <label>Bankr prompt people can copy</label>
+      <div class="prompt" id="profPrompt">@bankrbot send 500 ART to @handle on robinhood chain</div>
+      <div class="row">
+        <button class="go" id="profCopy" type="button">Copy prompt</button>
+      </div>
+    </section>
+    <section class="card" style="margin-top:14px">
+      <label>Selected art</label>
+      <p class="hint">Coming soon. This page will pin work you choose. Culture map only — ART is not affiliated with any listed artist.</p>
     </section>
     <p class="hint" id="status"></p>
     <footer><a href="index.html">Back to tip</a></footer>

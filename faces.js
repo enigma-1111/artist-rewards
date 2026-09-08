@@ -21,44 +21,11 @@
     grantyun: "https://pbs.twimg.com/profile_images/2022329863584329728/NJgt6JkX.jpg",
     BoredApeYC: "https://pbs.twimg.com/profile_images/1399966612405592065/irAtrWtO.jpg",
     pudgypenguins: "https://pbs.twimg.com/profile_images/1848765927451492364/VysuN6mu.jpg",
-    AzukiOfficial: "https://pbs.twimg.com/profile_images/1948071599187591168/y-2jJoZB.jpg"
+    AzukiOfficial: "https://pbs.twimg.com/profile_images/1948071599187591168/y-2jJoZB.jpg",
+    dmitricherniak: "https://artblocks-mainnet.s3.amazonaws.com/13000000.png",
+    mattdesl: "https://artblocks-mainnet.s3.amazonaws.com/15900000.png"
   };
-  var LOCAL = [
-    "nft_art", "mad_dog_jones", "deekaymotion", "frankdegods", "LucaNetz",
-    "TakashiMurakami", "zancan", "williammapan", "emilyxie_", "monicarizzolli",
-    "dmitricherniak", "dhof", "justinaversano", "coldie", "RobnessOfficial",
-    "ixshells", "slimesunday", "JosieBellini", "thesarahzucker", "fvckrender",
-    "androidjones", "blakekathryn", "osinachiart", "REAS", "mattdesl",
-    "bottoproject", "hollyherndon", "andresreisinger", "danielarsham", "kaws",
-    "gmunk", "MissALSimpson", "artnome", "shantell_martin", "jamesjeanart",
-    "loish", "AmberVittoria", "trevorjonesart", "piterpasma", "manoloide",
-    "kjetilgolid", "HelenaSarin", "CharlotteFang77", "pplpleasr1", "0xDesigner",
-    "CozomoMedici", "kidmograph", "gremplin", "sewerart", "osf_nft", "aeforia",
-    "seerlight", "jeffdavis"
-  ];
-  function localUrl(h) { return "/img/faces/" + h + ".jpg"; }
-  function unavatar(handle) {
-    return "https://unavatar.io/twitter/" + encodeURIComponent(handle) + "?fallback=false";
-  }
-  function sources(handle) {
-    var list = [];
-    if (FACE[handle]) list.push(FACE[handle]);
-    if (LOCAL.indexOf(handle) >= 0) list.push(localUrl(handle));
-    list.push(unavatar(handle));
-    list.push("https://unavatar.io/x/" + encodeURIComponent(handle) + "?fallback=false");
-    return list;
-  }
-  function hashHue(str) {
-    var h = 0; str = String(str || "");
-    for (var i = 0; i < str.length; i++) h = (h * 33 + str.charCodeAt(i)) >>> 0;
-    return h;
-  }
-  function blob(handle) {
-    var seed = hashHue(handle);
-    var a = PALETTE[seed % PALETTE.length][0];
-    var b = PALETTE[(seed + 3) % PALETTE.length][1];
-    return '<div class="ph artmark" style="display:none;--a:' + a + ";--b:" + b + '"></div>';
-  }
+  window.ART_FACE = FACE;
   function uniqueArtists() {
     var seen = {};
     return ARTISTS.filter(function (row) {
@@ -68,6 +35,7 @@
       return true;
     });
   }
+  function withPhoto(row) { return !!FACE[row[1]]; }
   function shuffle(arr) {
     var a = arr.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -76,36 +44,49 @@
     }
     return a;
   }
+  function isBlankAvatar(img) {
+    if (!img || !img.naturalWidth) return true;
+    if (img.naturalWidth < 24 || img.naturalHeight < 24) return true;
+    try {
+      var c = document.createElement("canvas");
+      c.width = 8; c.height = 8;
+      var ctx = c.getContext("2d");
+      ctx.drawImage(img, 0, 0, 8, 8);
+      var d = ctx.getImageData(0, 0, 8, 8).data;
+      var colors = {};
+      for (var i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 20) continue;
+        var key = (d[i] >> 4) + "," + (d[i + 1] >> 4) + "," + (d[i + 2] >> 4);
+        colors[key] = 1;
+      }
+      return Object.keys(colors).length <= 2;
+    } catch (e) { return false; }
+  }
   var pool = [];
   var used = {};
-  window.avErr = function (el) {
-    var h = el.getAttribute("data-h") || "";
-    var n = +(el.getAttribute("data-n") || 0);
-    var list = sources(h);
-    if (n + 1 < list.length) {
-      el.setAttribute("data-n", String(n + 1));
-      el.src = list[n + 1];
-      return;
-    }
+  var SHOW = 30;
+  function dropTile(el) {
     var btn = el.closest ? el.closest(".face") : el.parentNode;
-    if (btn && btn.classList && btn.classList.contains("face") && btn.parentNode && btn.parentNode.id === "faces") {
+    if (btn && btn.parentNode && btn.parentNode.id === "faces") {
       btn.parentNode.removeChild(btn);
       fillOne();
-      return;
     }
-    el.style.display = "none";
-    if (el.nextElementSibling) el.nextElementSibling.style.display = "grid";
-  };
+  }
+  window.avErr = function (el) { dropTile(el); };
+  window.avOk = function (el) { if (isBlankAvatar(el)) dropTile(el); };
   function tile(handle, name) {
-    var list = sources(handle);
-    return (
-      '<img data-h="' + handle + '" data-n="0" src="' + list[0] + '" alt="' + name + '" onerror="window.avErr(this)">' +
-      blob(handle)
-    );
+    var src = FACE[handle];
+    if (!src) return "";
+    return '<img data-h="' + handle + '" src="' + src + '" alt="' + name + '" onerror="window.avErr(this)" onload="window.avOk(this)">';
   }
   function setRecv(handle, name) {
     var rf = document.getElementById("recvFace");
-    if (rf) rf.innerHTML = tile(handle, name);
+    var src = FACE[handle];
+    if (rf) {
+      rf.innerHTML = src
+        ? '<img src="' + src + '" alt="' + name + '" onerror="this.style.display=\'none\'">'
+        : '<div class="ph">AR</div>';
+    }
     var rn = document.getElementById("recvName");
     if (rn) rn.textContent = "@" + handle;
     var rm = document.getElementById("recvMeta");
@@ -121,12 +102,14 @@
     });
   }
   function makeBtn(row) {
+    var html = tile(row[1], row[0]);
+    if (!html) return null;
     var el = document.createElement("button");
     el.className = "face";
     el.type = "button";
     el.dataset.handle = row[1];
     el.title = row[0];
-    el.innerHTML = tile(row[1], row[0]);
+    el.innerHTML = html;
     bind(el);
     return el;
   }
@@ -137,9 +120,10 @@
     while (pool.length) {
       var row = pool.pop();
       var k = row[1].toLowerCase();
-      if (used[k]) continue;
+      if (used[k] || !FACE[row[1]]) continue;
       used[k] = 1;
-      box.appendChild(makeBtn(row));
+      var btn = makeBtn(row);
+      if (btn) box.appendChild(btn);
       return;
     }
   }
@@ -147,17 +131,34 @@
     var box = document.getElementById("faces");
     if (!box) return;
     used = {};
-    pool = shuffle(uniqueArtists());
+    var photos = uniqueArtists().filter(withPhoto);
+    pool = shuffle(photos);
     box.innerHTML = "";
-    var i = 0;
-    while (box.querySelectorAll(".face").length < SHOW && i < SHOW + 20 && pool.length) {
-      fillOne();
-      i++;
-    }
+    var want = Math.min(SHOW, photos.length);
+    while (box.querySelectorAll(".face").length < want && pool.length) fillOne();
     var meta = document.getElementById("faceMeta");
-    if (meta) meta.textContent = SHOW + " random · " + uniqueArtists().length + " in the book · tap shuffle";
+    if (meta) meta.textContent = box.querySelectorAll(".face").length + " with photos · " + uniqueArtists().length + " searchable · shuffle";
   };
+  function paintCollections() {
+    var box = document.getElementById("collections");
+    if (!box || typeof COLLECTIONS === "undefined") return;
+    var list = COLLECTIONS.filter(function (c) { return c.img; });
+    box.innerHTML = list.map(function (c) {
+      return (
+        '<button class="tile" type="button" data-handle="' + c.handle + '" data-name="' + c.name + '">' +
+          '<img src="' + c.img + '" alt="' + c.name + '" onerror="this.parentNode.style.display=\'none\'">' +
+          '<div class="meta"><strong>' + c.name + "</strong><small>" + (c.chain || "culture map") + "</small></div>" +
+        "</button>"
+      );
+    }).join("");
+    box.querySelectorAll(".tile").forEach(function (el) {
+      el.addEventListener("click", function () {
+        if (typeof openConfirm === "function") openConfirm({ name: el.dataset.name, handle: el.dataset.handle, address: "" });
+      });
+    });
+  }
   var shuffleBtn = document.getElementById("shuffleFaces");
   if (shuffleBtn) shuffleBtn.addEventListener("click", function () { window.paintFaces(); });
   window.paintFaces();
+  paintCollections();
 })();
