@@ -1,13 +1,12 @@
 (function () {
   if (typeof ARTISTS === "undefined") return;
+  var SHOW = 30;
   var FACE = {
-    // collection / project
     cryptopunksnfts: "https://www.larvalabs.com/public/images/cryptopunks/punk5822.png",
     larvalabs: "https://www.larvalabs.com/public/images/cryptopunks/punk7804.png",
     artblocks_io: "https://avatars.githubusercontent.com/u/78487324?s=128",
     Snowfro: "https://artblocks-mainnet.s3.amazonaws.com/0.png",
     tylerxhobbs: "https://pbs.twimg.com/profile_images/1349165550627336192/PzaCVkHu.jpg",
-    // artists — stable pbs.twimg profile images (culture map only)
     beeple: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up.jpg",
     muratpak: "https://pbs.twimg.com/profile_images/1499888704718000128/5yERu3hS.jpg",
     XCOPYART: "https://pbs.twimg.com/profile_images/2006037095962247168/JxhvwKeJ.jpg",
@@ -24,8 +23,7 @@
     pudgypenguins: "https://pbs.twimg.com/profile_images/1848765927451492364/VysuN6mu.jpg",
     AzukiOfficial: "https://pbs.twimg.com/profile_images/1948071599187591168/y-2jJoZB.jpg"
   };
-  // hosted 128px stills — culture map only, not verified X photos
-  [
+  var LOCAL = [
     "nft_art", "mad_dog_jones", "deekaymotion", "frankdegods", "LucaNetz",
     "TakashiMurakami", "zancan", "williammapan", "emilyxie_", "monicarizzolli",
     "dmitricherniak", "dhof", "justinaversano", "coldie", "RobnessOfficial",
@@ -35,16 +33,20 @@
     "gmunk", "MissALSimpson", "artnome", "shantell_martin", "jamesjeanart",
     "loish", "AmberVittoria", "trevorjonesart", "piterpasma", "manoloide",
     "kjetilgolid", "HelenaSarin", "CharlotteFang77", "pplpleasr1", "0xDesigner",
-    "CozomoMedici", "kidmograph",
-    "gremplin", "sewerart", "osf_nft", "aeforia", "seerlight", "jeffdavis",
-    "beeple", "muratpak", "XCOPYART", "fewocious", "punk6529",
-    "jackbutcher", "yugalabs", "sofiacrespo", "hackatao",
-    "ClaireSilver12", "grantyun", "tylerxhobbs", "Snowfro", "artblocks_io"
-  ].forEach(function (h) {
-    FACE[h] = "/img/faces/" + h + ".jpg";
-  });
+    "CozomoMedici", "kidmograph", "gremplin", "sewerart", "osf_nft", "aeforia",
+    "seerlight", "jeffdavis"
+  ];
+  function localUrl(h) { return "/img/faces/" + h + ".jpg"; }
   function unavatar(handle) {
     return "https://unavatar.io/twitter/" + encodeURIComponent(handle) + "?fallback=false";
+  }
+  function sources(handle) {
+    var list = [];
+    if (FACE[handle]) list.push(FACE[handle]);
+    if (LOCAL.indexOf(handle) >= 0) list.push(localUrl(handle));
+    list.push(unavatar(handle));
+    list.push("https://unavatar.io/x/" + encodeURIComponent(handle) + "?fallback=false");
+    return list;
   }
   function hashHue(str) {
     var h = 0; str = String(str || "");
@@ -57,24 +59,47 @@
     var b = PALETTE[(seed + 3) % PALETTE.length][1];
     return '<div class="ph artmark" style="display:none;--a:' + a + ";--b:" + b + '"></div>';
   }
+  function uniqueArtists() {
+    var seen = {};
+    return ARTISTS.filter(function (row) {
+      var k = row[1].toLowerCase();
+      if (seen[k]) return false;
+      seen[k] = 1;
+      return true;
+    });
+  }
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  var pool = [];
+  var used = {};
   window.avErr = function (el) {
     var h = el.getAttribute("data-h") || "";
     var n = +(el.getAttribute("data-n") || 0);
-    var next = [];
-    if (FACE[h] && el.src.indexOf(FACE[h]) < 0) next.push(FACE[h]);
-    next.push("https://unavatar.io/x/" + encodeURIComponent(h) + "?fallback=false");
-    if (n < next.length) {
+    var list = sources(h);
+    if (n + 1 < list.length) {
       el.setAttribute("data-n", String(n + 1));
-      el.src = next[n];
+      el.src = list[n + 1];
+      return;
+    }
+    var btn = el.closest ? el.closest(".face") : el.parentNode;
+    if (btn && btn.classList && btn.classList.contains("face") && btn.parentNode && btn.parentNode.id === "faces") {
+      btn.parentNode.removeChild(btn);
+      fillOne();
       return;
     }
     el.style.display = "none";
     if (el.nextElementSibling) el.nextElementSibling.style.display = "grid";
   };
   function tile(handle, name) {
-    var first = FACE[handle] || unavatar(handle);
+    var list = sources(handle);
     return (
-      '<img data-h="' + handle + '" data-n="0" src="' + first + '" alt="' + name + '" onerror="window.avErr(this)">' +
+      '<img data-h="' + handle + '" data-n="0" src="' + list[0] + '" alt="' + name + '" onerror="window.avErr(this)">' +
       blob(handle)
     );
   }
@@ -86,27 +111,53 @@
     var rm = document.getElementById("recvMeta");
     if (rm) rm.textContent = name + " · confirm, then copy the Bankr prompt";
   }
+  function bind(el) {
+    el.addEventListener("click", function () {
+      var box = document.getElementById("faces");
+      if (box) box.querySelectorAll(".face").forEach(function (x) { x.classList.remove("on"); });
+      el.classList.add("on");
+      setRecv(el.dataset.handle, el.title);
+      if (typeof openConfirm === "function") openConfirm({ name: el.title, handle: el.dataset.handle, address: "" });
+    });
+  }
+  function makeBtn(row) {
+    var el = document.createElement("button");
+    el.className = "face";
+    el.type = "button";
+    el.dataset.handle = row[1];
+    el.title = row[0];
+    el.innerHTML = tile(row[1], row[0]);
+    bind(el);
+    return el;
+  }
+  function fillOne() {
+    var box = document.getElementById("faces");
+    if (!box) return;
+    if (box.querySelectorAll(".face").length >= SHOW) return;
+    while (pool.length) {
+      var row = pool.pop();
+      var k = row[1].toLowerCase();
+      if (used[k]) continue;
+      used[k] = 1;
+      box.appendChild(makeBtn(row));
+      return;
+    }
+  }
   window.paintFaces = function () {
     var box = document.getElementById("faces");
     if (!box) return;
-    var seen = {};
-    var list = ARTISTS.filter(function (row) {
-      var k = row[1].toLowerCase();
-      if (seen[k]) return false;
-      seen[k] = 1;
-      return true;
-    }).slice(0, 69);
-    box.innerHTML = list.map(function (row) {
-      return '<button class="face" type="button" data-handle="' + row[1] + '" title="' + row[0] + '">' + tile(row[1], row[0]) + "</button>";
-    }).join("");
-    box.querySelectorAll(".face").forEach(function (el) {
-      el.addEventListener("click", function () {
-        box.querySelectorAll(".face").forEach(function (x) { x.classList.remove("on"); });
-        el.classList.add("on");
-        setRecv(el.dataset.handle, el.title);
-        if (typeof openConfirm === "function") openConfirm({ name: el.title, handle: el.dataset.handle, address: "" });
-      });
-    });
+    used = {};
+    pool = shuffle(uniqueArtists());
+    box.innerHTML = "";
+    var i = 0;
+    while (box.querySelectorAll(".face").length < SHOW && i < SHOW + 20 && pool.length) {
+      fillOne();
+      i++;
+    }
+    var meta = document.getElementById("faceMeta");
+    if (meta) meta.textContent = SHOW + " random · " + uniqueArtists().length + " in the book · tap shuffle";
   };
+  var shuffleBtn = document.getElementById("shuffleFaces");
+  if (shuffleBtn) shuffleBtn.addEventListener("click", function () { window.paintFaces(); });
   window.paintFaces();
 })();
