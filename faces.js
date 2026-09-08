@@ -1,13 +1,11 @@
 (function () {
   if (typeof ARTISTS === "undefined") return;
   var FACE = {
-    // collection / project
     cryptopunksnfts: "https://www.larvalabs.com/public/images/cryptopunks/punk5822.png",
     larvalabs: "https://www.larvalabs.com/public/images/cryptopunks/punk7804.png",
     artblocks_io: "https://avatars.githubusercontent.com/u/78487324?s=128",
     Snowfro: "https://artblocks-mainnet.s3.amazonaws.com/0.png",
     tylerxhobbs: "https://pbs.twimg.com/profile_images/1349165550627336192/PzaCVkHu.jpg",
-    // artists — stable pbs.twimg profile images (culture map only)
     beeple: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up.jpg",
     muratpak: "https://pbs.twimg.com/profile_images/1499888704718000128/5yERu3hS.jpg",
     XCOPYART: "https://pbs.twimg.com/profile_images/2006037095962247168/JxhvwKeJ.jpg",
@@ -24,6 +22,20 @@
     pudgypenguins: "https://pbs.twimg.com/profile_images/1848765927451492364/VysuN6mu.jpg",
     AzukiOfficial: "https://pbs.twimg.com/profile_images/1948071599187591168/y-2jJoZB.jpg"
   };
+  [
+    "nft_art", "mad_dog_jones", "deekaymotion", "frankdegods", "LucaNetz",
+    "TakashiMurakami", "zancan", "williammapan", "emilyxie_", "monicarizzolli",
+    "dmitricherniak", "dhof", "justinaversano", "coldie", "RobnessOfficial",
+    "ixshells", "slimesunday", "JosieBellini", "thesarahzucker", "fvckrender",
+    "androidjones", "blakekathryn", "osinachiart", "REAS", "mattdesl",
+    "bottoproject", "hollyherndon", "andresreisinger", "danielarsham", "kaws",
+    "gmunk", "MissALSimpson", "artnome", "shantell_martin", "jamesjeanart",
+    "loish", "AmberVittoria", "trevorjonesart", "piterpasma", "manoloide",
+    "kjetilgolid", "HelenaSarin", "CharlotteFang77", "pplpleasr1", "0xDesigner",
+    "CozomoMedici", "kidmograph"
+  ].forEach(function (h) {
+    FACE[h] = "/img/faces/" + h + ".jpg";
+  });
   function unavatar(handle) {
     return "https://unavatar.io/twitter/" + encodeURIComponent(handle) + "?fallback=false";
   }
@@ -42,7 +54,7 @@
     var h = el.getAttribute("data-h") || "";
     var n = +(el.getAttribute("data-n") || 0);
     var next = [];
-    if (FACE[h] && el.src.indexOf("larvalabs") < 0 && el.src.indexOf("artblocks") < 0 && el.src.indexOf("pbs.twimg") < 0) next.push(FACE[h]);
+    if (FACE[h] && el.src.indexOf(FACE[h]) < 0) next.push(FACE[h]);
     next.push("https://unavatar.io/x/" + encodeURIComponent(h) + "?fallback=false");
     if (n < next.length) {
       el.setAttribute("data-n", String(n + 1));
