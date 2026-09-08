@@ -105,3 +105,12 @@ body.sheet-lock { overflow: hidden; }
 .wallet-card #walletNote { min-height: 1.2em; margin-top: 2px; }
 .tiny { padding: 6px 10px; font-size: 12px; border-radius: 999px; min-height: 44px; }
 .recv-face .ph { width: 56px; height: 56px; border-radius: 14px; }
+.map-note {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--rose);
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  max-width: 38em;
+}
+footer p + p { margin-top: 6px; }
