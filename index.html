@@ -62,13 +62,13 @@
 
     <section class="card" style="margin-top:14px">
       <label for="amt">Amount</label>
-      <div class="row" id="chips">
-        <button class="amt" data-v="100 ART">100</button>
-        <button class="amt on" data-v="500 ART">500</button>
-        <button class="amt" data-v="1000 ART">1,000</button>
-        <button class="amt" data-v="$5 of ART">$5</button>
+      <div class="row" id="chips" role="group" aria-label="Tip amount">
+        <button type="button" class="amt" data-v="100 ART" aria-pressed="false">100 ART</button>
+        <button type="button" class="amt on" data-v="500 ART" aria-pressed="true">500 ART</button>
+        <button type="button" class="amt" data-v="1000 ART" aria-pressed="false">1,000 ART</button>
+        <button type="button" class="amt" data-v="$5 of ART" aria-pressed="false">$5 of ART</button>
       </div>
-      <input id="amt" value="500 ART" style="margin-top:10px" />
+      <input id="amt" value="500 ART" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="prompt" style="margin-top:10px" />
       <div class="prompt" id="prompt">@bankrbot send 500 ART to @artist on robinhood chain</div>
       <div class="row" style="margin-top:12px">
         <button class="go" id="copy">Copy Bankr prompt</button>

@@ -155,12 +155,48 @@ function recipient() {
   if (picked.handle) return "@" + String(picked.handle).replace(/^@/, "");
   return "@artist";
 }
+function amountKey(raw) {
+  const t = String(raw || "").trim();
+  if (!t) return "";
+  if (/^\$/.test(t) || /\bof\s+ART\b/i.test(t)) {
+    const n = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+    return n ? "$" + n[1] : t.toLowerCase();
+  }
+  const n = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+  return n ? n[1] : t.toLowerCase();
+}
+function normalizeAmount(raw) {
+  const t = String(raw || "").trim();
+  if (!t) return "500 ART";
+  if (/^\$/.test(t) || /\bof\s+ART\b/i.test(t)) {
+    const n = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+    return "$" + (n ? n[1] : "5") + " of ART";
+  }
+  const n = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+  return n ? n[1] + " ART" : "500 ART";
+}
+function syncChips(canonical) {
+  const box = $("chips");
+  if (!box) return;
+  const key = amountKey(canonical);
+  box.querySelectorAll(".amt").forEach((x) => {
+    const on = amountKey(x.getAttribute("data-v")) === key;
+    x.classList.toggle("on", on);
+    x.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+}
 function writePrompt() {
   if (!promptEl) return "";
-  const amount = ((amt && amt.value) || "500 ART").trim();
+  const amount = normalizeAmount((amt && amt.value) || "500 ART");
   const line = "@bankrbot send " + amount + " to " + recipient() + " on robinhood chain";
   promptEl.textContent = line;
+  syncChips(amount);
   return line;
+}
+function commitAmount(raw) {
+  const amount = normalizeAmount(raw);
+  if (amt) amt.value = amount;
+  return writePrompt();
 }
 function openConfirm(t) {
   const handle = ((t && t.handle) || "").replace(/^@/, "");
@@ -345,16 +381,17 @@ if (sendBtn) sendBtn.addEventListener("click", sendArt);
 if ($("chips")) $("chips").addEventListener("click", (e) => {
   const b = e.target.closest(".amt");
   if (!b) return;
-  $("chips").querySelectorAll(".amt").forEach((x) => x.classList.remove("on"));
-  b.classList.add("on");
-  if (amt) amt.value = b.dataset.v;
-  writePrompt();
+  commitAmount(b.getAttribute("data-v"));
 });
 if (who) who.addEventListener("input", () => renderMatches(who.value));
-if (amt) amt.addEventListener("input", writePrompt);
+if (amt) {
+  amt.addEventListener("input", writePrompt);
+  amt.addEventListener("change", () => commitAmount(amt.value));
+  amt.addEventListener("blur", () => commitAmount(amt.value));
+}
 if ($("nft")) $("nft").addEventListener("change", () => lookupNft());
 if ($("copy")) $("copy").addEventListener("click", async () => {
-  const line = writePrompt();
+  const line = commitAmount(amt && amt.value);
   try {
     await navigator.clipboard.writeText(line);
     setStatus("Copied. Paste into Bankr or tweet at @bankrbot.", "ok");
