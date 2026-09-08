@@ -12,7 +12,7 @@
     return a;
   }
 
-  function setRecv(handle, name, img) {
+  function setRecv(handle, name, img, kind) {
     var wrap = document.getElementById("recv");
     var rf = document.getElementById("recvFace");
     if (rf) {
@@ -23,10 +23,15 @@
     var rn = document.getElementById("recvName");
     if (rn) rn.textContent = name || ("@" + handle);
     var rm = document.getElementById("recvMeta");
-    if (rm) rm.textContent = "@" + handle + " · Bankr can send to this handle";
+    if (rm) {
+      rm.textContent = kind === "collection"
+        ? "@" + handle + " · collection still · Bankr can send to this handle"
+        : "@" + handle + " · Bankr can send to this handle";
+    }
     if (wrap) wrap.classList.add("on");
     if (typeof picked !== "undefined") {
       picked.kind = "x";
+      picked.label = kind || "artist";
       picked.handle = handle;
       picked.address = "";
       picked.name = name || handle;
@@ -43,19 +48,21 @@
         x.classList.remove("on");
       });
       el.classList.add("on");
-      setRecv(el.dataset.handle, el.title, el.dataset.img);
+      var kind = el.dataset.kind || "artist";
+      setRecv(el.dataset.handle, el.title, el.dataset.img, kind);
       if (typeof openConfirm === "function") {
         openConfirm({
           name: el.title,
           handle: el.dataset.handle,
           address: "",
-          img: el.dataset.img
+          img: el.dataset.img,
+          kind: kind
         });
       }
     });
   }
 
-  function paintGrid(boxId, pool, metaId) {
+  function paintGrid(boxId, pool, metaId, kind) {
     var box = document.getElementById(boxId);
     if (!box) return;
     box.className = "faces";
@@ -64,7 +71,9 @@
     function meta() {
       var el = document.getElementById(metaId);
       if (!el) return;
-      el.textContent = box.querySelectorAll(".face").length + " on screen · " + pool.length + " in pool · shuffle";
+      el.textContent = kind === "collection"
+        ? box.querySelectorAll(".face").length + " on screen · " + pool.length + " in pool · culture map · shuffle"
+        : box.querySelectorAll(".face").length + " on screen · " + pool.length + " in pool · shuffle";
     }
     function add(row) {
       if (!row || !row.img) return;
@@ -74,7 +83,9 @@
       el.type = "button";
       el.dataset.handle = row.handle;
       el.dataset.img = row.img;
+      el.dataset.kind = kind || "artist";
       el.title = row.name || row.handle;
+      el.setAttribute("aria-label", (row.name || row.handle) + (kind === "collection" ? " collection" : ""));
       var img = document.createElement("img");
       img.alt = el.title;
       img.referrerPolicy = "no-referrer";
@@ -103,9 +114,15 @@
     meta();
   }
 
+  function paintArtists() {
+    paintGrid("faces", catalog.artists, "faceMeta", "artist");
+  }
+  function paintCollections() {
+    paintGrid("collections", catalog.collections, "collMeta", "collection");
+  }
   function paint() {
-    paintGrid("faces", catalog.artists, "faceMeta");
-    paintGrid("collections", catalog.collections, "collMeta");
+    paintArtists();
+    paintCollections();
   }
 
   function apply(data) {
@@ -116,9 +133,9 @@
   }
 
   var shuffleBtn = document.getElementById("shuffleFaces");
-  if (shuffleBtn) shuffleBtn.addEventListener("click", paint);
+  if (shuffleBtn) shuffleBtn.addEventListener("click", paintArtists);
   var shuffleCols = document.getElementById("shuffleCols");
-  if (shuffleCols) shuffleCols.addEventListener("click", paint);
+  if (shuffleCols) shuffleCols.addEventListener("click", paintCollections);
 
   fetch("/catalog.json")
     .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
