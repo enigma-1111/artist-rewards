@@ -36,15 +36,16 @@
         </div>
       </div>
       <label for="profX">X handle</label>
-      <input id="profX" autocomplete="off" spellcheck="false" placeholder="@handle Bankr can send to" />
+      <input id="profX" autocomplete="username" spellcheck="false" inputmode="text" placeholder="@handle Bankr can send to" />
       <label for="profWallet" style="margin-top:12px">Wallet</label>
-      <input id="profWallet" autocomplete="off" spellcheck="false" placeholder="0x…" />
+      <input id="profWallet" autocomplete="off" spellcheck="false" inputmode="text" placeholder="0x…" />
       <label for="profOs" style="margin-top:12px">OpenSea or site</label>
-      <input id="profOs" autocomplete="off" spellcheck="false" placeholder="opensea.io/… or your site" />
+      <input id="profOs" autocomplete="url" spellcheck="false" inputmode="url" placeholder="opensea.io/… or your site" />
       <div class="row">
         <button class="ghost" id="profUseWallet" type="button">Use connected wallet</button>
         <button class="go" id="profSave" type="button">Save</button>
       </div>
+      <p class="hint" id="profSaved" aria-live="polite">Nothing saved yet. Add a handle, wallet, or site, then Save.</p>
       <p class="hint">$ART received: <em id="profReceived">— until $ART is live</em></p>
     </section>
 
