@@ -17,36 +17,64 @@
     var handle = String((t && t.handle) || "").replace(/^@/, "");
     var address = (t && t.address) || "";
     var name = (t && t.name) || handle || "receiver";
-    var who = document.getElementById("who");
-    var value = address || (handle ? "@" + handle : "");
-    if (who) {
-      who.value = value;
-      who.dispatchEvent(new Event("input", { bubbles: true }));
+    var img = (t && t.img) || "";
+    if (!img) {
+      var on = document.querySelector(".face.on");
+      if (on && on.dataset.img) img = on.dataset.img;
     }
-    if (typeof renderMatches === "function") renderMatches(value);
-    if (typeof writePrompt === "function") writePrompt();
-    if (typeof paintRecv === "function") paintRecv();
     if (typeof picked !== "undefined") {
       picked.kind = address ? "addr" : "x";
       picked.handle = handle;
       picked.address = address;
       picked.name = name;
+      picked.img = img;
     }
+    var who = document.getElementById("who");
+    var value = address || (handle ? "@" + handle : "");
+    if (who) who.value = value;
+    if (typeof writePrompt === "function") writePrompt();
+    if (typeof paintRecv === "function") paintRecv();
+    if (typeof renderMatches === "function") renderMatches(value);
+    if (typeof writePrompt === "function") writePrompt();
+    if (typeof paintRecv === "function") paintRecv();
     document.querySelectorAll(".face").forEach(function (el) {
-      el.classList.toggle("on", el.dataset.handle === handle);
+      el.classList.toggle("on", handle && String(el.dataset.handle || "").toLowerCase() === handle.toLowerCase());
     });
-    var amt = document.getElementById("amt");
-    if (amt) amt.scrollIntoView({ behavior: "smooth", block: "center" });
+    var recv = document.getElementById("recv");
+    if (recv) recv.scrollIntoView({ behavior: "smooth", block: "nearest" });
     var status = document.getElementById("status");
     if (status) {
       status.className = "hint ok";
       status.textContent = address
-        ? "Receiver set to " + address.slice(0, 6) + "…" + address.slice(-4) + ". Confirm the logo."
-        : "Receiver set to @" + handle + ". Confirm the logo, then copy the Bankr prompt.";
+        ? "Receiver set to " + address.slice(0, 6) + "\u2026" + address.slice(-4) + ". Copy the Bankr prompt."
+        : "Receiver set to " + name + " (@" + handle + "). Copy the Bankr prompt.";
     }
   }
 
   window.openConfirm = pick;
+
+  document.querySelectorAll(".face").forEach(function (el) {
+    var handle = el.dataset.handle;
+    var name = el.getAttribute("title") || handle;
+    el.addEventListener("click", function () {
+      hideHover();
+      pick({ name: name, handle: handle, address: "" });
+    });
+    el.addEventListener("pointerenter", function (ev) { showHover(ev, name, handle); });
+    el.addEventListener("pointerleave", hideHover);
+  });
+
+  document.querySelectorAll(".tile").forEach(function (el) {
+    el.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      var nameEl = el.querySelector("strong");
+      pick({
+        name: el.dataset.name || (nameEl && nameEl.textContent) || "collection",
+        handle: el.dataset.handle,
+        address: ""
+      });
+    });
+  });
 
   var connects = document.querySelector(".connects");
   if (connects) {

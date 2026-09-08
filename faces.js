@@ -13,16 +13,28 @@
   }
 
   function setRecv(handle, name, img) {
+    var wrap = document.getElementById("recv");
     var rf = document.getElementById("recvFace");
     if (rf) {
       rf.innerHTML = img
-        ? '<img src="' + img + '" alt="' + name + '">' 
+        ? '<img src="' + img + '" alt="' + name + '" referrerpolicy="no-referrer">'
         : '<div class="ph">AR</div>';
     }
     var rn = document.getElementById("recvName");
-    if (rn) rn.textContent = "@" + handle;
+    if (rn) rn.textContent = name || ("@" + handle);
     var rm = document.getElementById("recvMeta");
-    if (rm) rm.textContent = name + " \u00b7 confirm, then copy the Bankr prompt";
+    if (rm) rm.textContent = "@" + handle + " · Bankr can send to this handle";
+    if (wrap) wrap.classList.add("on");
+    if (typeof picked !== "undefined") {
+      picked.kind = "x";
+      picked.handle = handle;
+      picked.address = "";
+      picked.name = name || handle;
+      picked.img = img || "";
+    }
+    var whoEl = document.getElementById("who");
+    if (whoEl) whoEl.value = handle ? "@" + handle : "";
+    if (typeof writePrompt === "function") writePrompt();
   }
 
   function bind(el) {
@@ -33,7 +45,12 @@
       el.classList.add("on");
       setRecv(el.dataset.handle, el.title, el.dataset.img);
       if (typeof openConfirm === "function") {
-        openConfirm({ name: el.title, handle: el.dataset.handle, address: "" });
+        openConfirm({
+          name: el.title,
+          handle: el.dataset.handle,
+          address: "",
+          img: el.dataset.img
+        });
       }
     });
   }
@@ -47,7 +64,7 @@
     function meta() {
       var el = document.getElementById(metaId);
       if (!el) return;
-      el.textContent = box.querySelectorAll(".face").length + " on screen \u00b7 " + pool.length + " in pool \u00b7 shuffle";
+      el.textContent = box.querySelectorAll(".face").length + " on screen · " + pool.length + " in pool · shuffle";
     }
     function add(row) {
       if (!row || !row.img) return;
@@ -80,8 +97,8 @@
       bind(el);
       box.appendChild(el);
     }
-    var first = list.splice(0, SHOW);
     var i;
+    var first = list.splice(0, SHOW);
     for (i = 0; i < first.length; i++) add(first[i]);
     meta();
   }
@@ -94,6 +111,7 @@
   function apply(data) {
     catalog.artists = (data && data.artists) || [];
     catalog.collections = (data && data.collections) || [];
+    window.__artCatalog = catalog;
     paint();
   }
 
