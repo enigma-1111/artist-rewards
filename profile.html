@@ -21,10 +21,12 @@
         <button class="ghost" id="connect" type="button">Connect</button>
       </div>
     </nav>
+
     <header>
       <h1>Your page</h1>
       <p class="lede">Saved on this phone. Bankr tips the X handle you paste. $ART received stays blank until the token is live.</p>
     </header>
+
     <section class="card">
       <div class="recv">
         <div class="recv-face" id="profFace"><div class="ph">AR</div></div>
@@ -45,17 +47,21 @@
       </div>
       <p class="hint">$ART received: <em id="profReceived">— until $ART is live</em></p>
     </section>
+
     <section class="card" style="margin-top:14px">
       <label>Bankr prompt people can copy</label>
-      <div class="prompt" id="profPrompt">@bankrbot send 500 ART to @handle on robinhood chain</div>
+      <div class="prompt" id="profPrompt" role="button" tabindex="0" title="Tap to copy">@bankrbot send 500 ART to @handle on robinhood chain</div>
       <div class="row">
         <button class="go" id="profCopy" type="button">Copy prompt</button>
       </div>
+      <p class="hint" id="profCopyStatus" aria-live="polite">Tap Copy, or tap the prompt. Paste into Bankr.</p>
     </section>
+
     <section class="card" style="margin-top:14px">
       <label>Selected art</label>
       <p class="hint">Coming soon. This page will pin work you choose. Culture map only — ART is not affiliated with any listed artist.</p>
     </section>
+
     <p class="hint" id="status"></p>
     <footer><a href="index.html">Back to tip</a></footer>
   </div>
