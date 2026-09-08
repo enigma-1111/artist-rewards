@@ -1,6 +1,7 @@
 (function () {
   var SHOW = 30;
   var catalog = { artists: [], collections: [] };
+  var lastNew = { faces: 0, collections: 0 };
 
   function shuffle(arr) {
     var a = arr.slice();
@@ -10,6 +11,55 @@
       t = a[i]; a[i] = a[j]; a[j] = t;
     }
     return a;
+  }
+
+  function usable(pool) {
+    var seen = {};
+    var out = [];
+    var i, row, key;
+    for (i = 0; i < pool.length; i++) {
+      row = pool[i];
+      if (!row || !row.img || !row.handle) continue;
+      key = String(row.img);
+      if (seen[key]) continue;
+      seen[key] = 1;
+      out.push(row);
+    }
+    return out;
+  }
+
+  function shownImgs(boxId) {
+    var box = document.getElementById(boxId);
+    var keys = {};
+    if (!box) return keys;
+    box.querySelectorAll(".face").forEach(function (el) {
+      if (el.dataset.img) keys[el.dataset.img] = 1;
+    });
+    return keys;
+  }
+
+  function drawFromPool(pool, boxId) {
+    var rows = usable(pool);
+    var on = shownImgs(boxId);
+    var onCount = 0;
+    var k;
+    for (k in on) if (Object.prototype.hasOwnProperty.call(on, k)) onCount++;
+    if (!onCount) return { list: shuffle(rows), fresh: 0, poolSize: rows.length };
+    var fresh = [];
+    var kept = [];
+    var i, row;
+    for (i = 0; i < rows.length; i++) {
+      row = rows[i];
+      if (on[row.img]) kept.push(row);
+      else fresh.push(row);
+    }
+    fresh = shuffle(fresh);
+    kept = shuffle(kept);
+    return {
+      list: fresh.concat(kept),
+      fresh: fresh.length,
+      poolSize: rows.length
+    };
   }
 
   function setRecv(handle, name, img, kind) {
@@ -62,18 +112,27 @@
     });
   }
 
+  function pickedHandle() {
+    if (typeof picked === "undefined" || !picked || !picked.handle) return "";
+    return String(picked.handle).replace(/^@/, "").toLowerCase();
+  }
+
   function paintGrid(boxId, pool, metaId, kind) {
     var box = document.getElementById(boxId);
     if (!box) return;
+    var draw = drawFromPool(pool, boxId);
+    var list = draw.list.slice();
+    lastNew[boxId] = draw.fresh;
     box.className = "faces";
     box.innerHTML = "";
-    var list = shuffle(pool.filter(function (row) { return row && row.img && row.handle; }));
     function meta() {
       var el = document.getElementById(metaId);
       if (!el) return;
+      var n = box.querySelectorAll(".face").length;
+      var extra = draw.fresh ? " · " + Math.min(draw.fresh, n) + " new" : " · shuffle";
       el.textContent = kind === "collection"
-        ? box.querySelectorAll(".face").length + " on screen · " + pool.length + " in pool · culture map · shuffle"
-        : box.querySelectorAll(".face").length + " on screen · " + pool.length + " in pool · shuffle";
+        ? n + " on screen · " + draw.poolSize + " in pool · culture map" + extra
+        : n + " on screen · " + draw.poolSize + " in pool" + extra;
     }
     function add(row) {
       if (!row || !row.img) return;
@@ -86,6 +145,9 @@
       el.dataset.kind = kind || "artist";
       el.title = row.name || row.handle;
       el.setAttribute("aria-label", (row.name || row.handle) + (kind === "collection" ? " collection" : ""));
+      if (pickedHandle() && String(row.handle).toLowerCase() === pickedHandle()) {
+        el.classList.add("on");
+      }
       var img = document.createElement("img");
       img.alt = el.title;
       img.referrerPolicy = "no-referrer";
@@ -114,6 +176,13 @@
     meta();
   }
 
+  function flashChip(id) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.classList.add("on");
+    window.setTimeout(function () { btn.classList.remove("on"); }, 280);
+  }
+
   function paintArtists() {
     paintGrid("faces", catalog.artists, "faceMeta", "artist");
   }
@@ -133,9 +202,19 @@
   }
 
   var shuffleBtn = document.getElementById("shuffleFaces");
-  if (shuffleBtn) shuffleBtn.addEventListener("click", paintArtists);
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener("click", function () {
+      flashChip("shuffleFaces");
+      paintArtists();
+    });
+  }
   var shuffleCols = document.getElementById("shuffleCols");
-  if (shuffleCols) shuffleCols.addEventListener("click", paintCollections);
+  if (shuffleCols) {
+    shuffleCols.addEventListener("click", function () {
+      flashChip("shuffleCols");
+      paintCollections();
+    });
+  }
 
   fetch("/catalog.json")
     .then(function (r) { return r.ok ? r.json() : Promise.reject(); })

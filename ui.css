@@ -23,6 +23,10 @@
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
   gap: 4px;
   margin: 6px 0 14px;
+  min-height: 280px;
+}
+button.chip.on {
+  border-color: var(--chart);
 }
 .face {
   aspect-ratio: 1;
