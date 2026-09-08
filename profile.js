@@ -4,11 +4,21 @@
   function $(id) { return document.getElementById(id); }
 
   function load() {
-    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; }
+    try { return scrubSelected(JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { return {}; }
   }
 
   function saveStore(p) {
-    localStorage.setItem(KEY, JSON.stringify(p));
+    localStorage.setItem(KEY, JSON.stringify(scrubSelected(p)));
+  }
+
+  function scrubSelected(raw) {
+    var p = raw && typeof raw === "object" ? raw : {};
+    var drop = ["art", "selected", "selectedArt", "pinned", "pin", "work", "nft"];
+    var i;
+    for (i = 0; i < drop.length; i++) {
+      if (Object.prototype.hasOwnProperty.call(p, drop[i])) delete p[drop[i]];
+    }
+    return p;
   }
 
   function handleOf(p) {
@@ -239,6 +249,22 @@
       if (recv && recv.classList) recv.classList.add("on");
     }
     setSavedLine(p, (h || p.wallet || p.os) ? "ok" : "");
+    paintSoon();
+  }
+
+  function paintSoon() {
+    var frame = $("soonFrame");
+    var title = $("soonTitle");
+    var meta = $("soonMeta");
+    if (frame) {
+      frame.innerHTML = '<div class="ph">AR</div>';
+      frame.setAttribute("data-kind", "empty");
+      frame.removeAttribute("data-src");
+    }
+    if (title) title.textContent = "Nothing pinned";
+    if (meta) {
+      meta.textContent = "This page will pin work you choose. Not live. Culture map only \u2014 ART is not affiliated with any listed artist or collection.";
+    }
   }
 
   function grab(opts) {
@@ -335,6 +361,18 @@
   }
 
   if ($("profSave")) $("profSave").addEventListener("click", function () { grab(); });
+
+  var pin = $("soonPin");
+  if (pin) {
+    pin.addEventListener("click", function () {
+      var note = $("soonNote") || $("status");
+      if (note) {
+        note.className = "hint warn";
+        note.textContent = "Selected art is not live. Nothing was pinned or saved from the catalog.";
+      }
+      paintSoon();
+    });
+  }
 
   function setCopyStatus(msg, kind) {
     var s = $("profCopyStatus") || $("status");
@@ -463,5 +501,9 @@
       paintFace($("profFace"), liveHandle());
     });
 
+  try {
+    var first = load();
+    saveStore(first);
+  } catch (e) {}
   draw();
 })();
