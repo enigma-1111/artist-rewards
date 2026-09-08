@@ -23,12 +23,10 @@
         <button class="ghost" id="connect" type="button">Connect</button>
       </div>
     </nav>
-
     <header>
       <h1>Tip an artist</h1>
       <p class="lede">Tap a face, confirm the receiver, copy the Bankr prompt. Holders earn 90% of fees in $ART and WETH.</p>
     </header>
-
     <section>
       <div class="sec face-head">
         <span>Artists</span>
@@ -37,7 +35,6 @@
       <p class="hint" id="faceMeta" aria-live="polite"></p>
       <div class="faces" id="faces"></div>
     </section>
-
     <section>
       <div class="sec face-head">
         <span>Collections</span>
@@ -46,7 +43,6 @@
       <p class="hint" id="collMeta" aria-live="polite">Culture map. Tap a still — same tip path as an artist. Not affiliated.</p>
       <div class="faces" id="collections"></div>
     </section>
-
     <section class="card">
       <label>To</label>
       <div class="recv" id="recv">
@@ -59,7 +55,6 @@
       <input id="who" autocomplete="off" spellcheck="false" placeholder="@handle, name, or 0x…" role="combobox" aria-autocomplete="list" aria-controls="matches" aria-expanded="false" aria-haspopup="listbox" />
       <div id="matches" role="listbox" aria-label="Matching artists and collections"></div>
     </section>
-
     <section class="card" style="margin-top:14px">
       <label for="amt">Amount</label>
       <div class="row" id="chips" role="group" aria-label="Tip amount">
@@ -76,7 +71,6 @@
       </div>
       <p class="hint" id="status" aria-live="polite">Token is not live yet. Copy the Bankr prompt. On-site Send waits for the 0x.</p>
     </section>
-
     <section class="card" style="margin-top:14px">
       <label for="nft">Or tip an NFT holder</label>
       <input id="nft" autocomplete="off" spellcheck="false" placeholder="OpenSea item link or 0x / token id" aria-describedby="nftHint" />
@@ -86,7 +80,6 @@
       <p class="hint" id="nftHint">Paste an item link. Shows the current holder, or a clear miss. ERC-721 only.</p>
       <div id="nftOut" aria-live="polite"></div>
     </section>
-
     <footer>
       Holders earn 90% of fees in $ART and WETH. Culture map only — not affiliated with any listed artist or collection.
       <a href="profile.html">Artist profile</a>
@@ -94,6 +87,7 @@
   </div>
   <div id="hover" class="hover" hidden></div>
   <script src="app.js"></script>
+  <script src="app-more.js"></script>
   <script src="faces.js"></script>
   <script src="connect.js"></script>
   <script src="confirm.js"></script>
