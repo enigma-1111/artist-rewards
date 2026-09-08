@@ -1,12 +1,13 @@
 :root {
   --bg: #1a100e;
   --paper: #f3ead7;
-  --mute: #cbb9a4;
-  --line: rgba(243,234,215,.16);
+  --mute: #e2d0b8;
+  --line: rgba(243,234,215,.32);
   --red: #e23d28;
-  --rose: #f0a58e;
+  --rose: #f6b39c;
   --chart: #e6ff63;
   --ok: #9ee3a4;
+  --focus: #e6ff63;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -91,6 +92,13 @@ h1 { font-weight: 500; font-size: clamp(28px, 6vw, 46px); line-height: 1.05; }
   aspect-ratio: 1;
   border: 0; padding: 0; border-radius: 8px; overflow: hidden;
   background: #2a1612; cursor: pointer; position: relative;
+  min-width: 44px;
+  min-height: 44px;
+}
+.face:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  z-index: 1;
 }
 .faces .face .ph { display: none !important; }
 .face img, .face .ph {
@@ -101,7 +109,7 @@ h1 { font-weight: 500; font-size: clamp(28px, 6vw, 46px); line-height: 1.05; }
   color: var(--paper);
   background: linear-gradient(160deg, var(--a, #e23d28), var(--b, #3d6bff));
 }
-.face.on { outline: 2px solid var(--chart); outline-offset: 0; }
+.face.on { outline: 2px solid var(--chart); outline-offset: 2px; z-index: 1; }
 .grid { display: grid; gap: 14px; margin-top: 8px; grid-template-columns: 1fr; }
 @media (min-width: 860px) {
   .grid { grid-template-columns: 1.1fr .9fr; align-items: start; }
@@ -121,8 +129,15 @@ input {
   border: 1px solid var(--line); border-radius: 12px;
   padding: 14px; font-size: 16px; outline: none;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 44px;
 }
-input:focus { border-color: var(--red); }
+input::placeholder { color: #c4ae96; opacity: 1; }
+input:focus,
+input:focus-visible {
+  border-color: var(--chart);
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
 .hint {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--mute); font-size: 12px; margin-top: 8px; line-height: 1.4;
@@ -137,9 +152,10 @@ button {
   background: #160e0c; color: var(--paper); border: 1px solid var(--line);
   min-height: 44px; min-width: 44px; flex: 1 1 auto; padding: 10px 12px;
 }
-.amt.on { border-color: var(--chart); color: var(--chart); }
-.amt:focus-visible { outline: 2px solid var(--chart); outline-offset: 2px; }
+.amt.on { border-color: var(--chart); color: var(--chart); background: #22180c; }
+.amt:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .go { background: var(--red); color: var(--paper); flex: 1; min-height: 44px; }
+.go:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .go.send { background: #3d6bff; }
 .go.send.wait {
   background: transparent;
@@ -148,7 +164,8 @@ button {
 }
 .go.send.wait:focus-visible { outline: 2px solid var(--chart); outline-offset: 2px; }
 .go:disabled { opacity: .45; cursor: not-allowed; }
-.ghost { background: transparent; color: var(--paper); border: 1px solid var(--line); }
+.ghost { background: transparent; color: var(--paper); border: 1px solid var(--line); min-height: 44px; }
+.ghost:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 #matches { margin-top: 4px; }
 #matches:empty { display: none; }
 .match {
@@ -159,6 +176,7 @@ button {
   min-height: 44px;
 }
 .match.on { border-color: var(--chart); }
+.match:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .match-face {
   width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: none;
   background: #2a1612;
@@ -221,10 +239,11 @@ ol.steps {
 }
 ol.steps strong { color: var(--paper); font-weight: 600; }
 footer {
-  margin-top: 28px; color: var(--mute); font-size: 12px; line-height: 1.55;
+  margin-top: 28px; color: var(--mute); font-size: 13px; line-height: 1.55;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-footer a { color: inherit; }
+footer a { color: var(--chart); text-underline-offset: 3px; }
+footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
 .warn { color: var(--rose); font-size: 12px; margin-top: 10px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 #nftOut .hint { margin-top: 10px; }
 #nftOut .match { cursor: default; }
@@ -233,9 +252,19 @@ footer a { color: inherit; }
 
 .connects .chip, button.chip {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 12px; color: var(--chart); background: transparent;
-  border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px;
+  font-size: 13px; color: var(--chart); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 0 14px;
   font-weight: 600;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+button.chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 .hover {
   display: none;
