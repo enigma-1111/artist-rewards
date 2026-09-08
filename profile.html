@@ -65,13 +65,28 @@
       <p class="hint" id="profCopyStatus" aria-live="polite">Add your X handle above. Preview updates from that handle, not @artist.</p>
     </section>
 
-    <section class="card" style="margin-top:14px">
-      <label>Selected art</label>
-      <p class="hint">Coming soon. This page will pin work you choose. Culture map only — ART is not affiliated with any listed artist.</p>
+    <section class="card soon-card" id="selectedArt" style="margin-top:14px" aria-labelledby="selectedArtLabel">
+      <div class="sec-row">
+        <label id="selectedArtLabel">Selected art</label>
+        <span class="pill soon-badge">Coming soon</span>
+      </div>
+      <div class="soon-slot">
+        <div class="soon-frame" id="soonFrame" data-kind="empty" aria-hidden="true">
+          <div class="ph">AR</div>
+        </div>
+        <div>
+          <strong id="soonTitle">Nothing pinned</strong>
+          <span id="soonMeta">This page will pin work you choose. Not live. Culture map only — ART is not affiliated with any listed artist or collection.</span>
+        </div>
+      </div>
+      <div class="row">
+        <button class="ghost" id="soonPin" type="button" aria-disabled="true" title="Pin waits until selected art ships">Pin later</button>
+      </div>
+      <p class="hint" id="soonNote">No picker yet. Will not save a catalog still as your work.</p>
     </section>
 
     <p class="hint" id="status"></p>
-    <footer><a href="index.html">Back to tip</a></footer>
+    <footer>Culture map only — not affiliated with any listed artist or collection. <a href="index.html">Back to tip</a></footer>
   </div>
   <script src="profile.js"></script>
   <script src="connect.js"></script>
