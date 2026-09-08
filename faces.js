@@ -199,6 +199,10 @@
     catalog.collections = (data && data.collections) || [];
     window.__artCatalog = catalog;
     paint();
+    var whoEl = document.getElementById("who");
+    if (whoEl && whoEl.value && typeof renderMatches === "function") {
+      renderMatches(whoEl.value, { keepPicked: true });
+    }
   }
 
   var shuffleBtn = document.getElementById("shuffleFaces");
