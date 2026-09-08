@@ -7,6 +7,20 @@
   function load() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
   function save(p) { localStorage.setItem(KEY, JSON.stringify(p)); }
 
+  function bankrLine() {
+    var tip = $("prompt");
+    if (tip && tip.textContent && tip.textContent.indexOf("@artist") === -1) return tip.textContent;
+    var pr = $("profPrompt");
+    if (pr && pr.getAttribute("data-ready") === "1" && pr.textContent) return pr.textContent;
+    var p = load();
+    var h = String((p && p.x) || "").replace(/^@+/, "").replace(/[^A-Za-z0-9_]/g, "");
+    if (h) {
+      var amt = String((p && p.amt) || "500 ART");
+      return "@bankrbot send " + amt + " to @" + h + " on robinhood chain";
+    }
+    return "";
+  }
+
   function note(msg, kind) {
     var el = $("walletNote");
     if (el) {
@@ -169,12 +183,14 @@
     if (w === "ph") go("https://phantom.app/ul/browse/" + encodeURIComponent(SITE) + "?ref=" + encodeURIComponent(SITE));
     if (w === "tw") go("https://link.trustwallet.com/open_url?coin_id=60&url=" + encodeURIComponent(SITE));
     if (w === "bankr") {
-      var line = ($("prompt") && $("prompt").textContent) ||
-        ($("profPrompt") && $("profPrompt").textContent) ||
-        "@bankrbot send 500 ART to @artist on robinhood chain";
-      try { navigator.clipboard.writeText(line); } catch (e2) {}
+      var line = bankrLine();
+      if (line) {
+        try { navigator.clipboard.writeText(line); } catch (e2) {}
+        note("Bankr prompt copied. Sign in at bankr.bot (Privy) and paste it.", "ok");
+      } else {
+        note("Add an X handle on Profile, or pick a receiver on Tip, then open Bankr.", "warn");
+      }
       window.open("https://bankr.bot", "_blank", "noopener");
-      note("Bankr prompt copied. Sign in at bankr.bot (Privy) and paste it.", "ok");
       close();
     }
     if (w === "paste") {
