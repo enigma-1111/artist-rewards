@@ -23,12 +23,21 @@
 button.chip.on {
   border-color: var(--chart);
 }
+button.chip {
+  min-height: 44px;
+  min-width: 44px;
+}
 .face {
   aspect-ratio: 1;
-  min-width: 0;
+  min-width: 44px;
   min-height: 44px;
   border: 0; padding: 0; border-radius: 8px; overflow: hidden;
   background: #2a1612; cursor: pointer;
+}
+.face:focus-visible {
+  outline: 2px solid var(--chart);
+  outline-offset: 2px;
+  z-index: 1;
 }
 #faces .face,
 #collections .face {
