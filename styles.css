@@ -124,15 +124,22 @@ button {
 .go.send { background: #3d6bff; }
 .go:disabled { opacity: .45; cursor: not-allowed; }
 .ghost { background: transparent; color: var(--paper); border: 1px solid var(--line); }
+#matches { margin-top: 4px; }
+#matches:empty { display: none; }
 .match {
   display: flex; gap: 12px; align-items: center;
-  padding: 12px; border: 1px solid var(--line); border-radius: 14px;
-  margin-top: 10px; cursor: pointer; background: #160e0c;
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px;
+  margin-top: 8px; cursor: pointer; background: #160e0c;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 44px;
 }
 .match.on { border-color: var(--chart); }
-.match img, .ph {
-  width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #3a221c;
+.match-face {
+  width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: none;
+  background: #2a1612;
+}
+.match img, .match-face img, .match-face .ph, .ph {
+  width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background: #3a221c;
 }
 .ph { display: grid; place-items: center; font-size: 14px; color: var(--paper); background: var(--red); font-weight: 700; }
 .match strong { display: block; font-size: 14px; }
