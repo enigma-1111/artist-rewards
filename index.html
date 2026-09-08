@@ -53,11 +53,11 @@
         <div class="recv-face" id="recvFace"><div class="ph">AR</div></div>
         <div>
           <strong id="recvName">Pick a receiver</strong>
-          <span id="recvMeta">Tap a mark or paste @handle / 0x</span>
+          <span id="recvMeta">Tap a mark or type a name / @handle</span>
         </div>
       </div>
-      <input id="who" autocomplete="off" spellcheck="false" placeholder="@handle or 0x…" />
-      <div id="matches"></div>
+      <input id="who" autocomplete="off" spellcheck="false" placeholder="@handle, name, or 0x…" role="combobox" aria-autocomplete="list" aria-controls="matches" aria-expanded="false" aria-haspopup="listbox" />
+      <div id="matches" role="listbox" aria-label="Matching artists and collections"></div>
     </section>
 
     <section class="card" style="margin-top:14px">
