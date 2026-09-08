@@ -24,6 +24,7 @@
     }
     if (typeof picked !== "undefined") {
       picked.kind = address ? "addr" : "x";
+      picked.label = (t && t.kind) || picked.label || "artist";
       picked.handle = handle;
       picked.address = address;
       picked.name = name;
@@ -46,7 +47,7 @@
     if (status) {
       status.className = "hint ok";
       status.textContent = address
-        ? "Receiver set to " + address.slice(0, 6) + "\u2026" + address.slice(-4) + ". Copy the Bankr prompt."
+        ? "Receiver set to " + address.slice(0, 6) + "…" + address.slice(-4) + ". Copy the Bankr prompt."
         : "Receiver set to " + name + " (@" + handle + "). Copy the Bankr prompt.";
     }
   }
@@ -71,7 +72,9 @@
       pick({
         name: el.dataset.name || (nameEl && nameEl.textContent) || "collection",
         handle: el.dataset.handle,
-        address: ""
+        address: "",
+        img: el.dataset.img || "",
+        kind: "collection"
       });
     });
   });
