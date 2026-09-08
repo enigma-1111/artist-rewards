@@ -14,6 +14,20 @@
   "bankr": "@bankrbot send 500 ART to @handle on robinhood chain",
   "mcp": "https://art-rewards.vercel.app/api/mcp",
   "mcpAlt": "https://art-rewards.vercel.app/mcp",
+  "tools": [
+    "get_art_status",
+    "list_artists",
+    "list_initials",
+    "list_collections",
+    "build_bankr_prompt",
+    "validate_contract",
+    "parse_nft_tip"
+  ],
+  "calls": {
+    "status": "https://art-rewards.vercel.app/api/mcp?tool=get_art_status",
+    "artists": "https://art-rewards.vercel.app/api/mcp?tool=list_artists&q=beeple",
+    "bankr": "https://art-rewards.vercel.app/api/mcp?tool=build_bankr_prompt&handle=beeple&amount=500%20ART"
+  },
   "pages": ["/", "/profile.html"],
   "affiliation": "none",
   "note": "Human launches on pools.fun and pastes the 0x. Contract stays empty until then.",
