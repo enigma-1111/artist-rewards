@@ -232,18 +232,70 @@ function isAddr(s) {
   return /^0x[a-fA-F0-9]{40}$/.test(String(s || ""));
 }
 
-function bankr(handle, amount) {
-  const h = String(handle || "artist").replace(/^@/, "");
-  const raw = String(amount || "500 ART").trim();
-  let amt = "500 ART";
-  if (/^\$/.test(raw) || /\bof\s+ART\b/i.test(raw)) {
-    const n = raw.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
-    amt = "$" + (n ? n[1] : "5") + " of ART";
-  } else {
-    const n = raw.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
-    amt = (n ? n[1] : "500") + " ART";
+const BLOCKED_HANDLES = {
+  "": 1,
+  artist: 1,
+  yourhandle: 1,
+  handle: 1,
+  user: 1,
+  name: 1,
+};
+
+function cleanHandle(s) {
+  return String(s || "")
+    .trim()
+    .replace(/^@/, "")
+    .replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
+}
+
+function isBlockedHandle(h) {
+  return !!BLOCKED_HANDLES[String(h || "").toLowerCase()];
+}
+
+function amountChip(raw) {
+  const s = String(raw || "500 ART").trim();
+  if (/^\$/.test(s) || /\bof\s+ART\b/i.test(s)) {
+    const n = s.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+    return "$" + (n ? n[1] : "5") + " of ART";
   }
+  const n = s.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+  return (n ? n[1] : "500") + " ART";
+}
+
+function bankr(handle, amount) {
+  const h = cleanHandle(handle);
+  const amt = amountChip(amount);
   return "@bankrbot send " + amt + " to @" + h + " on robinhood chain";
+}
+
+function matchQ(list, q) {
+  const needle = String(q || "")
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase();
+  if (!needle) return list;
+  return list.filter((row) => {
+    const name = String(row.name || "").toLowerCase();
+    const handle = String(row.handle || "").toLowerCase();
+    return name.indexOf(needle) !== -1 || handle.indexOf(needle) !== -1;
+  });
+}
+
+async function resolveCatalogHit(query) {
+  const q = cleanHandle(query);
+  if (!q || isBlockedHandle(q)) return null;
+  const cat = await liveCatalog();
+  if (!cat) return null;
+  const pool = catalogRows(cat.artists).concat(catalogRows(cat.collections));
+  const low = q.toLowerCase();
+  return (
+    pool.find((r) => r.handle.toLowerCase() === low) ||
+    pool.find((r) => String(r.name || "").toLowerCase() === low) ||
+    pool.find((r) => r.handle.toLowerCase().indexOf(low) !== -1 || String(r.name || "").toLowerCase().indexOf(low) !== -1) ||
+    null
+  );
 }
 
 const TOOLS = [
@@ -255,10 +307,12 @@ const TOOLS = [
   },
   {
     name: "list_artists",
-    description: "Culture-map artist list with face source (pbs, cdn, initials).",
+    description:
+      "Culture-map artists from live catalog.json. Optional q filters name or handle. face=pbs|cdn|local|initials is the legacy face-map only.",
     inputSchema: {
       type: "object",
       properties: {
+        q: { type: "string", description: "Filter by name or @handle" },
         face: { type: "string", enum: ["all", "pbs", "cdn", "local", "initials"], default: "all" },
       },
     },
@@ -270,16 +324,22 @@ const TOOLS = [
   },
   {
     name: "list_collections",
-    description: "Culture-map collections. Not affiliated with any listed name.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "build_bankr_prompt",
-    description: "Build the Bankr copy-paste tip prompt.",
+    description: "Culture-map collections from live catalog.json. Optional q filters name or handle. Not affiliated.",
     inputSchema: {
       type: "object",
       properties: {
-        handle: { type: "string", description: "X handle without or with @" },
+        q: { type: "string", description: "Filter by name or @handle" },
+      },
+    },
+  },
+  {
+    name: "build_bankr_prompt",
+    description:
+      "Build the Bankr copy-paste tip prompt. Refuses leftover @artist / @yourhandle. Amount chips: 100 ART, 500 ART, 1000 ART, $5 of ART.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        handle: { type: "string", description: "X handle or catalog name. Not @artist." },
         amount: { type: "string", description: "e.g. 500 ART or $5 of ART" },
       },
       required: ["handle"],
@@ -317,35 +377,71 @@ async function callTool(name, args) {
       catalogCollections: cat ? cat.collections.length : null,
       faceMap: rows().length,
       lookalikeWarning: STATUS.lookalike,
+      tools: TOOLS.map((t) => t.name),
+      calls: {
+        status: SITE + "/api/mcp?tool=get_art_status",
+        artists: SITE + "/api/mcp?tool=list_artists&q=beeple",
+        bankr: SITE + "/api/mcp?tool=build_bankr_prompt&handle=beeple&amount=500%20ART",
+      },
     };
   }
   if (name === "list_artists") {
     const want = args.face || "all";
+    const q = args.q || args.query || "";
     if (want === "all") {
       const cat = await liveCatalog();
       if (cat && cat.artists.length) {
-        const list = catalogRows(cat.artists);
-        return { count: list.length, artists: list, affiliation: "none", source: "catalog.json" };
+        const list = matchQ(catalogRows(cat.artists), q);
+        return { count: list.length, artists: list, affiliation: "none", source: "catalog.json", q: q || null };
       }
     }
-    const list = rows().filter((r) => want === "all" || r.face === want);
-    return { count: list.length, artists: list, source: "face-map" };
+    const list = matchQ(
+      rows().filter((r) => want === "all" || r.face === want),
+      q
+    );
+    return { count: list.length, artists: list, source: "face-map", q: q || null };
   }
   if (name === "list_initials") {
     const list = rows().filter((r) => r.face === "initials");
     return { count: list.length, artists: list, note: "Legacy face-map. Live grids use catalog.json stills." };
   }
   if (name === "list_collections") {
+    const q = args.q || args.query || "";
     const cat = await liveCatalog();
     if (cat && cat.collections.length) {
-      const list = catalogRows(cat.collections);
-      return { count: list.length, collections: list, affiliation: "none", source: "catalog.json" };
+      const list = matchQ(catalogRows(cat.collections), q);
+      return { count: list.length, collections: list, affiliation: "none", source: "catalog.json", q: q || null };
     }
-    return { count: COLLECTIONS.length, collections: COLLECTIONS, affiliation: "none", source: "fallback" };
+    return {
+      count: COLLECTIONS.length,
+      collections: matchQ(COLLECTIONS, q),
+      affiliation: "none",
+      source: "fallback",
+      q: q || null,
+    };
   }
   if (name === "build_bankr_prompt") {
-    const prompt = bankr(args.handle, args.amount);
-    return { prompt, handle: String(args.handle || "").replace(/^@/, ""), amount: args.amount || "500 ART" };
+    let handle = cleanHandle(args.handle);
+    const amount = amountChip(args.amount);
+    if (isBlockedHandle(handle)) {
+      return {
+        ok: false,
+        reason: "placeholder-handle",
+        hint: "Pass a real @handle. Will not copy leftover @artist or @yourhandle.",
+        handle: handle || "",
+        amount,
+      };
+    }
+    const hit = await resolveCatalogHit(handle);
+    if (hit) handle = hit.handle;
+    return {
+      ok: true,
+      prompt: bankr(handle, amount),
+      handle,
+      amount,
+      matched: hit ? { name: hit.name, handle: hit.handle } : null,
+      affiliation: "none",
+    };
   }
   if (name === "validate_contract") {
     const address = String(args.address || "").trim();
@@ -415,9 +511,9 @@ async function handleRpc(msg) {
       result: {
         protocolVersion: PROTOCOL,
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "artist-rewards", version: "1.0.0" },
+        serverInfo: { name: "artist-rewards", version: "1.1.0" },
         instructions:
-          "Artist Rewards Token $ART tipping site tools. Culture map only. Do not invent a contract. Do not print chain id on the public page.",
+          "Artist Rewards Token $ART tipping site tools. Culture map only. Do not invent a contract. Do not print chain id on the public page. GET /api/mcp?tool=get_art_status also answers.",
       },
     };
   }
@@ -429,6 +525,20 @@ async function handleRpc(msg) {
   }
   if (method === "tools/list") {
     return { jsonrpc: "2.0", id, result: { tools: TOOLS } };
+  }
+  if (method === "resources/list") {
+    return {
+      jsonrpc: "2.0",
+      id,
+      result: {
+        resources: [
+          { uri: SITE + "/agent.json", name: "agent.json", mimeType: "application/json" },
+          { uri: SITE + "/catalog.json", name: "catalog.json", mimeType: "application/json" },
+          { uri: SITE + "/", name: "tip", mimeType: "text/html" },
+          { uri: SITE + "/profile.html", name: "profile", mimeType: "text/html" },
+        ],
+      },
+    };
   }
   if (method === "tools/call") {
     const name = params && params.name;
@@ -461,6 +571,18 @@ module.exports = async function handler(req, res) {
     return res.end();
   }
   if (req.method === "GET") {
+    const url = new URL(req.url || "/api/mcp", SITE);
+    const tool = url.searchParams.get("tool");
+    if (tool) {
+      const args = {};
+      url.searchParams.forEach((v, k) => {
+        if (k !== "tool") args[k] = v;
+      });
+      const obj = await callTool(tool, args);
+      res.setHeader("Content-Type", "application/json");
+      const miss = obj && obj.error === "unknown_tool";
+      return res.status(miss ? 404 : 200).json(obj);
+    }
     const cat = await liveCatalog();
     res.setHeader("Content-Type", "application/json");
     return res.status(200).json({
@@ -468,6 +590,11 @@ module.exports = async function handler(req, res) {
       mcp: true,
       agent: SITE + "/agent.json",
       tools: TOOLS.map((t) => t.name),
+      calls: {
+        status: SITE + "/api/mcp?tool=get_art_status",
+        artists: SITE + "/api/mcp?tool=list_artists&q=beeple",
+        bankr: SITE + "/api/mcp?tool=build_bankr_prompt&handle=beeple&amount=500%20ART",
+      },
       status: {
         ...STATUS,
         contract: "",
@@ -480,7 +607,14 @@ module.exports = async function handler(req, res) {
     res.statusCode = 405;
     return res.end("method not allowed");
   }
-  const body = req.body;
+  let body = req.body;
+  if (typeof body === "string") {
+    try {
+      body = JSON.parse(body);
+    } catch (err) {
+      body = null;
+    }
+  }
   const messages = Array.isArray(body) ? body : [body];
   const out = [];
   for (const msg of messages) {
