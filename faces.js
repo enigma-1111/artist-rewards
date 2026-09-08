@@ -44,9 +44,14 @@
     box.className = "faces";
     box.innerHTML = "";
     var list = shuffle(pool.filter(function (row) { return row && row.img && row.handle; }));
-    var shown = 0;
+    function meta() {
+      var el = document.getElementById(metaId);
+      if (!el) return;
+      el.textContent = box.querySelectorAll(".face").length + " on screen \u00b7 " + pool.length + " in pool \u00b7 shuffle";
+    }
     function add(row) {
       if (!row || !row.img) return;
+      if (box.querySelectorAll(".face").length >= SHOW) return;
       var el = document.createElement("button");
       el.className = "face";
       el.type = "button";
@@ -55,11 +60,15 @@
       el.title = row.name || row.handle;
       var img = document.createElement("img");
       img.alt = el.title;
+      img.referrerPolicy = "no-referrer";
       img.src = row.img;
       img.onload = function () {
         if (!img.naturalWidth || img.naturalWidth < 16) {
           if (el.parentNode) el.parentNode.removeChild(el);
+          var next = list.shift();
+          if (next) add(next);
         }
+        meta();
       };
       img.onerror = function () {
         if (el.parentNode) el.parentNode.removeChild(el);
@@ -71,17 +80,9 @@
       bind(el);
       box.appendChild(el);
     }
+    var first = list.splice(0, SHOW);
     var i;
-    for (i = 0; i < list.length && shown < SHOW; i++) {
-      add(list[i]);
-      shown++;
-    }
-    list = list.slice(shown);
-    function meta() {
-      var el = document.getElementById(metaId);
-      if (!el) return;
-      el.textContent = box.querySelectorAll(".face").length + " on screen \u00b7 " + pool.length + " in pool \u00b7 shuffle";
-    }
+    for (i = 0; i < first.length; i++) add(first[i]);
     meta();
   }
 
@@ -90,22 +91,10 @@
     paintGrid("collections", catalog.collections, "collMeta");
   }
 
-  function localFallback() {
-    var rows = (typeof ARTISTS !== "undefined" ? ARTISTS : []).map(function (row) {
-      return {
-        name: row[0],
-        handle: row[1],
-        img: "https://unavatar.io/twitter/" + encodeURIComponent(row[1]) + "?fallback=false"
-      };
-    });
-    var seen = {};
-    catalog.artists = rows.filter(function (r) {
-      var k = String(r.handle).toLowerCase();
-      if (seen[k]) return false;
-      seen[k] = 1;
-      return true;
-    });
-    catalog.collections = [];
+  function apply(data) {
+    catalog.artists = (data && data.artists) || [];
+    catalog.collections = (data && data.collections) || [];
+    paint();
   }
 
   var shuffleBtn = document.getElementById("shuffleFaces");
@@ -113,16 +102,18 @@
   var shuffleCols = document.getElementById("shuffleCols");
   if (shuffleCols) shuffleCols.addEventListener("click", paint);
 
-  fetch("/api/catalog")
+  fetch("/catalog.json")
     .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(apply)
+    .catch(function () {
+      return fetch("/api/catalog").then(function (r) { return r.ok ? r.json() : Promise.reject(); });
+    })
     .then(function (data) {
-      catalog.artists = data.artists || [];
-      catalog.collections = data.collections || [];
-      if (!catalog.artists.length) localFallback();
-      paint();
+      if (data && !(catalog.artists.length || catalog.collections.length)) apply(data);
     })
     .catch(function () {
-      localFallback();
+      catalog.artists = [];
+      catalog.collections = [];
       paint();
     });
 })();
