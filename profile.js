@@ -150,11 +150,62 @@
     el.textContent = summarize(p);
   }
 
-  function paintFace(face, h) {
+  var catalogIndex = {};
+
+  function indexCatalog(data) {
+    catalogIndex = {};
+    function add(row, kind) {
+      if (!row || !row.handle || !row.img) return;
+      var key = String(row.handle).replace(/^@+/, "").toLowerCase();
+      if (!key) return;
+      if (catalogIndex[key] && catalogIndex[key].kind === "artist") return;
+      catalogIndex[key] = {
+        handle: row.handle,
+        name: row.name || row.handle,
+        img: String(row.img),
+        kind: kind
+      };
+    }
+    var i;
+    var arts = (data && data.artists) || [];
+    var cols = (data && data.collections) || [];
+    for (i = 0; i < arts.length; i++) add(arts[i], "artist");
+    for (i = 0; i < cols.length; i++) add(cols[i], "collection");
+  }
+
+  function catalogHit(h) {
+    if (!h) return null;
+    return catalogIndex[String(h).replace(/^@+/, "").toLowerCase()] || null;
+  }
+
+  function paintMark(face, h) {
     if (!face) return;
-    face.innerHTML = '<div class="ph">AR</div>';
+    face.innerHTML = '<div class="ph" aria-hidden="true">AR</div>';
+    face.setAttribute("data-src", "");
+    face.setAttribute("data-kind", "mark");
     if (h) face.setAttribute("title", "@" + h);
     else face.removeAttribute("title");
+  }
+
+  function paintFace(face, h) {
+    if (!face) return;
+    var hit = catalogHit(h);
+    if (!hit || !hit.img) {
+      paintMark(face, h);
+      return;
+    }
+    if (face.getAttribute("data-src") === hit.img && face.querySelector("img")) return;
+    var img = document.createElement("img");
+    img.alt = hit.name || ("@" + h);
+    img.setAttribute("referrerpolicy", "no-referrer");
+    img.referrerPolicy = "no-referrer";
+    img.onerror = function () { paintMark(face, h); };
+    img.src = hit.img;
+    face.innerHTML = "";
+    face.appendChild(img);
+    face.setAttribute("data-src", hit.img);
+    face.setAttribute("data-kind", hit.kind || "still");
+    face.setAttribute("title", (hit.name ? hit.name + " \u00b7 " : "") + "@" + h);
   }
 
   function draw() {
@@ -167,18 +218,22 @@
     if (x && document.activeElement !== x) x.value = h ? "@" + h : "";
     if (os && document.activeElement !== os) os.value = p.os || "";
     if (rec) rec.textContent = "\u2014 until $ART is live";
+    var live = liveHandle();
     if (name) {
-      name.textContent = h ? "@" + h : (p.wallet ? short(p.wallet) : "Not set");
+      name.textContent = live ? "@" + live : (p.wallet ? short(p.wallet) : "Not set");
     }
     if (sub) {
-      if (h && p.wallet) sub.textContent = "Wallet linked on this device";
-      else if (h) sub.textContent = "Bankr can send to this handle";
+      var hit = catalogHit(live);
+      if (live && hit && p.wallet) sub.textContent = "Culture-map still \u00b7 wallet on this device";
+      else if (live && hit) sub.textContent = "Culture-map still \u00b7 Bankr can send to this handle";
+      else if (live && p.wallet) sub.textContent = "Wallet linked on this device";
+      else if (live) sub.textContent = "Bankr can send to this handle";
       else if (p.wallet) sub.textContent = "Wallet saved. Add an X handle for Bankr.";
       else if (p.os) sub.textContent = "Site saved. Add a handle so people can tip you";
       else sub.textContent = "Add a handle so people can tip you";
     }
     writePrompt();
-    paintFace(face, h);
+    paintFace(face, live);
     if (h || p.wallet) {
       var recv = face && face.parentElement;
       if (recv && recv.classList) recv.classList.add("on");
@@ -249,8 +304,12 @@
         var h = liveHandle();
         if (name && document.activeElement === el) name.textContent = h ? "@" + h : "Not set";
         if (sub && document.activeElement === el) {
-          sub.textContent = h ? "Bankr can send to this handle" : "Add a handle so people can tip you";
+          var hit = catalogHit(h);
+          if (h && hit) sub.textContent = "Culture-map still \u00b7 Bankr can send to this handle";
+          else if (h) sub.textContent = "Bankr can send to this handle";
+          else sub.textContent = "Add a handle so people can tip you";
         }
+        paintFace($("profFace"), h);
         writePrompt();
       }
     });
@@ -391,6 +450,18 @@
   });
 
   window.addEventListener("pageshow", function () { draw(); });
+
+  fetch("/catalog.json")
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function (data) {
+      indexCatalog(data);
+      paintFace($("profFace"), liveHandle());
+      draw();
+    })
+    .catch(function () {
+      catalogIndex = {};
+      paintFace($("profFace"), liveHandle());
+    });
 
   draw();
 })();

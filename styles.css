@@ -247,6 +247,10 @@ footer a { color: inherit; }
   width: 56px; height: 56px; object-fit: cover; display: block;
   border-radius: 14px;
 }
+.recv-face[data-kind="mark"] { background: var(--red); }
+.recv-face[data-kind="artist"] img,
+.recv-face[data-kind="collection"] img,
+.recv-face[data-kind="still"] img { background: #2a1612; }
 .recv strong { display: block; font-size: 15px; }
 .recv span { display: block; color: var(--mute); font-size: 12px; line-height: 1.35; margin-top: 2px; }
 .soon { color: var(--chart) !important; }
