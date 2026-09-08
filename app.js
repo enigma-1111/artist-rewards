@@ -102,53 +102,189 @@ function paintRecv() {
       : "@" + handle + " \u00b7 Bankr can send to this handle";
   } else {
     nameEl.textContent = "Pick a receiver";
-    metaEl.textContent = "Tap a mark or paste @handle / 0x";
+    metaEl.textContent = "Tap a mark or type a name / @handle";
   }
   if (wrap) wrap.classList.toggle("on", !!(handle || picked.address));
 }
-function cardHTML(id, title, sub, extra) {
+function esc(s) {
+  return String(s || "").replace(/[&<>"']/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+  });
+}
+function cardHTML(id, title, sub, extra, img) {
   const ph = initials(title);
-  return '<div class="match" data-id="' + id + '"><div class="ph">' + ph + "</div><div><strong>" + title + "</strong><span>" + sub + (extra ? " \u00b7 " + extra : "") + "</span></div></div>";
+  const mark = img
+    ? '<img alt="" referrerpolicy="no-referrer" src="' + esc(img) + '" onerror="window.avErr(this)"><div class="ph" style="display:none">' + ph + "</div>"
+    : '<div class="ph">' + ph + "</div>";
+  return '<div class="match" data-id="' + esc(id) + '" role="option"><div class="match-face">' + mark + "</div><div><strong>" + esc(title) + "</strong><span>" + esc(sub) + (extra ? " \u00b7 " + esc(extra) : "") + "</span></div></div>";
 }
-function renderMatches(raw) {
-  if (!matchesEl) return;
-  const addr = extractAddr(raw);
-  const handle = extractHandle(raw);
-  const os = extractOpensea(raw);
-  const nft = parseNft(raw);
-  const cards = [];
-  if (nft) lookupNft(raw);
-  if (addr) cards.push({ id: "addr", kind: "addr", handle: "", address: addr, html: cardHTML("addr", addr.slice(0, 6) + "\u2026" + addr.slice(-4), "Wallet", "ready to send") });
-  if (handle) cards.push({ id: "x", kind: "x", handle: handle, address: "", html: cardHTML("x", "@" + handle, "X profile", "Bankr can send to the linked wallet") });
-  if (os && !os.startsWith("0x") && !addr) cards.push({ id: "os", kind: "os", handle: os, address: "", html: cardHTML("os", os, "OpenSea profile", "paste their 0x to send from this page") });
-  else if (!addr && !handle && !nft && String(raw || "").trim().length >= 2) {
-    const guess = String(raw).trim().replace(/^@/, "");
-    cards.push({ id: "x", kind: "x", handle: guess, address: "", html: cardHTML("x", "@" + guess, "Treat as X handle", "tap to confirm") });
+function catalogPool() {
+  const cat = window.__artCatalog || {};
+  const out = [];
+  const seen = {};
+  function add(row, kind) {
+    if (!row || !row.handle) return;
+    const handle = String(row.handle).replace(/^@/, "");
+    const name = String(row.name || handle);
+    const key = handle.toLowerCase() + "|" + name.toLowerCase();
+    if (seen[key]) return;
+    seen[key] = 1;
+    out.push({ handle: handle, name: name, img: row.img || "", kind: kind });
   }
-  matchesEl.innerHTML = cards.map((c) => c.html).join("");
-  window.__cards = cards;
-  if (cards[0]) select(cards[0].id);
-  else writePrompt();
-  matchesEl.querySelectorAll(".match").forEach((el) => el.addEventListener("click", () => select(el.dataset.id)));
+  (cat.artists || []).forEach(function (r) { add(r, "artist"); });
+  (cat.collections || []).forEach(function (r) { add(r, "collection"); });
+  return out;
 }
-function select(id) {
+function scoreHit(row, q) {
+  const h = String(row.handle || "").toLowerCase();
+  const n = String(row.name || "").toLowerCase();
+  if (!q) return 0;
+  if (h === q) return 100;
+  if (n === q) return 90;
+  if (h.startsWith(q)) return 80;
+  if (n.startsWith(q)) return 70;
+  if (h.indexOf(q) >= 0) return 55;
+  if (n.indexOf(q) >= 0) return 45;
+  return 0;
+}
+function searchCatalog(raw) {
+  const q = String(raw || "").trim().replace(/^@/, "").toLowerCase();
+  if (q.length < 1) return [];
+  return catalogPool()
+    .map(function (row) { return { row: row, score: scoreHit(row, q) }; })
+    .filter(function (x) { return x.score > 0; })
+    .sort(function (a, b) { return b.score - a.score || a.row.name.localeCompare(b.row.name); })
+    .slice(0, 6)
+    .map(function (x, i) {
+      const row = x.row;
+      const kind = row.kind === "collection" ? "collection" : "artist";
+      return {
+        id: "cat-" + i,
+        kind: "x",
+        label: kind,
+        handle: row.handle,
+        address: "",
+        name: row.name,
+        img: row.img,
+        html: cardHTML("cat-" + i, row.name, "@" + row.handle, kind === "collection" ? "collection still" : "culture map", row.img)
+      };
+    });
+}
+function setWhoExpanded(on) {
+  if (who) who.setAttribute("aria-expanded", on ? "true" : "false");
+}
+function highlightMatch(id) {
+  if (!matchesEl) return;
+  window.__activeMatch = id;
+  matchesEl.querySelectorAll(".match").forEach(function (el) {
+    const on = el.dataset.id === id;
+    el.classList.toggle("on", on);
+    if (on) el.setAttribute("aria-selected", "true");
+    else el.removeAttribute("aria-selected");
+  });
+}
+function renderMatches(raw, opts) {
+  if (!matchesEl) return;
+  const commit = !!(opts && opts.commit);
+  const trimmed = String(raw || "").trim();
+  if (!trimmed) {
+    matchesEl.innerHTML = "";
+    window.__cards = [];
+    window.__activeMatch = "";
+    setWhoExpanded(false);
+    if (!(opts && opts.keepPicked)) {
+      picked = { kind: "x", handle: "", address: "", name: "", img: "", label: "" };
+      document.querySelectorAll(".face.on").forEach(function (el) { el.classList.remove("on"); });
+      writePrompt();
+      paintRecv();
+    }
+    return;
+  }
+  const addr = extractAddr(trimmed);
+  const handle = extractHandle(trimmed);
+  const os = extractOpensea(trimmed);
+  const nft = parseNft(trimmed);
+  const cards = [];
+  if (nft) lookupNft(trimmed);
+  if (addr) {
+    cards.push({
+      id: "addr",
+      kind: "addr",
+      label: "wallet",
+      handle: "",
+      address: addr,
+      name: shortAddr(addr),
+      img: "",
+      html: cardHTML("addr", shortAddr(addr), "Wallet", "ready to send")
+    });
+  } else {
+    searchCatalog(trimmed).forEach(function (c) { cards.push(c); });
+    const typed = handle || (!os && !nft && trimmed.length >= 2 ? trimmed.replace(/^@/, "") : "");
+    const already = typed && cards.some(function (c) {
+      return String(c.handle || "").toLowerCase() === typed.toLowerCase();
+    });
+    if (typed && !already && /^[A-Za-z0-9_]{1,30}$/.test(typed)) {
+      cards.push({
+        id: "x",
+        kind: "x",
+        label: "artist",
+        handle: typed,
+        address: "",
+        name: typed,
+        img: stillFor(typed),
+        html: cardHTML("x", "@" + typed, "Treat as X handle", "tap to confirm", stillFor(typed))
+      });
+    }
+    if (os && !os.startsWith("0x") && !cards.length) {
+      cards.push({
+        id: "os",
+        kind: "os",
+        label: "artist",
+        handle: os,
+        address: "",
+        name: os,
+        img: "",
+        html: cardHTML("os", os, "OpenSea profile", "paste their 0x to send from this page")
+      });
+    }
+  }
+  matchesEl.innerHTML = cards.map(function (c) { return c.html; }).join("");
+  window.__cards = cards;
+  setWhoExpanded(cards.length > 0);
+  const start = cards[0] ? cards[0].id : "";
+  highlightMatch(start);
+  matchesEl.querySelectorAll(".match").forEach(function (el) {
+    el.addEventListener("click", function () { select(el.dataset.id, { commit: true }); });
+  });
+  if (commit && cards[0]) select(cards[0].id, { commit: true });
+  else writePrompt();
+}
+function select(id, opts) {
   const cards = window.__cards || [];
-  const c = cards.find((x) => x.id === id) || cards[0];
+  const c = cards.find(function (x) { return x.id === id; }) || cards[0];
   if (!c) return;
-  const keepImg = picked.img;
-  const keepName = picked.name;
-  const keepLabel = picked.label;
+  highlightMatch(c.id);
+  if (!(opts && opts.commit)) return;
   picked = {
-    kind: c.kind || picked.kind,
-    label: keepLabel || "artist",
-    handle: c.handle || picked.handle,
+    kind: c.kind || "x",
+    label: c.label || (c.kind === "addr" ? "wallet" : "artist"),
+    handle: c.handle || "",
     address: c.address || "",
-    name: c.name || keepName || c.handle,
-    img: c.img || keepImg || stillFor(c.handle)
+    name: c.name || c.handle || "",
+    img: c.img || stillFor(c.handle)
   };
-  matchesEl.querySelectorAll(".match").forEach((el) => el.classList.toggle("on", el.dataset.id === id));
+  if (who) who.value = picked.address || (picked.handle ? "@" + picked.handle : who.value);
+  document.querySelectorAll("#faces .face, #collections .face").forEach(function (el) {
+    el.classList.toggle("on", !!(picked.handle && String(el.dataset.handle || "").toLowerCase() === String(picked.handle).toLowerCase()));
+  });
   writePrompt();
   paintRecv();
+  if (statusEl && (picked.handle || picked.address)) {
+    statusEl.className = "hint ok";
+    statusEl.textContent = picked.address
+      ? "Receiver set to " + shortAddr(picked.address) + ". Copy the Bankr prompt."
+      : "Receiver set to " + (picked.name || "@" + picked.handle) + ". Copy the Bankr prompt.";
+  }
 }
 function recipient() {
   if (picked.kind === "addr" && picked.address) return picked.address;
@@ -383,7 +519,37 @@ if ($("chips")) $("chips").addEventListener("click", (e) => {
   if (!b) return;
   commitAmount(b.getAttribute("data-v"));
 });
-if (who) who.addEventListener("input", () => renderMatches(who.value));
+if (who) {
+  who.addEventListener("input", function () { renderMatches(who.value); });
+  who.addEventListener("keydown", function (e) {
+    const cards = window.__cards || [];
+    if (!cards.length) return;
+    const ids = cards.map(function (c) { return c.id; });
+    let i = ids.indexOf(window.__activeMatch);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      highlightMatch(ids[(i + 1) % ids.length]);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      highlightMatch(ids[(i - 1 + ids.length) % ids.length]);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      select(window.__activeMatch || ids[0], { commit: true });
+    } else if (e.key === "Escape") {
+      matchesEl.innerHTML = "";
+      window.__cards = [];
+      window.__activeMatch = "";
+      setWhoExpanded(false);
+    }
+  });
+  who.addEventListener("blur", function () {
+    window.setTimeout(function () {
+      if (!who.value.trim()) return;
+      const cards = window.__cards || [];
+      if (!picked.handle && !picked.address && cards[0]) select(window.__activeMatch || cards[0].id, { commit: true });
+    }, 180);
+  });
+}
 if (amt) {
   amt.addEventListener("input", writePrompt);
   amt.addEventListener("change", () => commitAmount(amt.value));
