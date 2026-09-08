@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a100e" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Artistry profile — ART</title>
   <link rel="icon" href="logo.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
@@ -15,9 +17,9 @@
         <img class="logo" src="logo.svg" width="36" height="36" alt="ART" />
         <div><strong>ART</strong><small>Artist Rewards</small></div>
       </div>
-      <div class="nav-links">
+      <div class="nav-links" role="navigation" aria-label="Site">
         <a href="index.html">Tip</a>
-        <a class="on" href="profile.html">Profile</a>
+        <a class="on" href="profile.html" aria-current="page">Profile</a>
         <button class="ghost" id="connect" type="button">Connect</button>
       </div>
     </nav>
