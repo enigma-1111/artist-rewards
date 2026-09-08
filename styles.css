@@ -250,6 +250,7 @@ footer a { color: inherit; }
 .recv span { display: block; color: var(--mute); font-size: 12px; line-height: 1.35; margin-top: 2px; }
 .soon { color: var(--chart) !important; }
 #profReceived { color: var(--chart); font-style: normal; }
+#profSaved { min-height: 1.4em; }
 .nav-links { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .nav-links a,
 .nav-links #connect {
