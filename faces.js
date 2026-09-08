@@ -1,11 +1,13 @@
 (function () {
   if (typeof ARTISTS === "undefined") return;
   var FACE = {
+    // collection / project
     cryptopunksnfts: "https://www.larvalabs.com/public/images/cryptopunks/punk5822.png",
     larvalabs: "https://www.larvalabs.com/public/images/cryptopunks/punk7804.png",
     artblocks_io: "https://avatars.githubusercontent.com/u/78487324?s=128",
     Snowfro: "https://artblocks-mainnet.s3.amazonaws.com/0.png",
     tylerxhobbs: "https://pbs.twimg.com/profile_images/1349165550627336192/PzaCVkHu.jpg",
+    // artists — stable pbs.twimg profile images (culture map only)
     beeple: "https://pbs.twimg.com/profile_images/264316321/beeple_headshot_beat_up.jpg",
     muratpak: "https://pbs.twimg.com/profile_images/1499888704718000128/5yERu3hS.jpg",
     XCOPYART: "https://pbs.twimg.com/profile_images/2006037095962247168/JxhvwKeJ.jpg",
@@ -22,6 +24,7 @@
     pudgypenguins: "https://pbs.twimg.com/profile_images/1848765927451492364/VysuN6mu.jpg",
     AzukiOfficial: "https://pbs.twimg.com/profile_images/1948071599187591168/y-2jJoZB.jpg"
   };
+  // hosted 128px stills — culture map only, not verified X photos
   [
     "nft_art", "mad_dog_jones", "deekaymotion", "frankdegods", "LucaNetz",
     "TakashiMurakami", "zancan", "williammapan", "emilyxie_", "monicarizzolli",
@@ -32,7 +35,11 @@
     "gmunk", "MissALSimpson", "artnome", "shantell_martin", "jamesjeanart",
     "loish", "AmberVittoria", "trevorjonesart", "piterpasma", "manoloide",
     "kjetilgolid", "HelenaSarin", "CharlotteFang77", "pplpleasr1", "0xDesigner",
-    "CozomoMedici", "kidmograph"
+    "CozomoMedici", "kidmograph",
+    "gremplin", "sewerart", "osf_nft", "aeforia", "seerlight", "jeffdavis",
+    "beeple", "muratpak", "XCOPYART", "fewocious", "punk6529",
+    "jackbutcher", "yugalabs", "sofiacrespo", "hackatao",
+    "ClaireSilver12", "grantyun", "tylerxhobbs", "Snowfro", "artblocks_io"
   ].forEach(function (h) {
     FACE[h] = "/img/faces/" + h + ".jpg";
   });
