@@ -122,6 +122,12 @@ button {
 .amt:focus-visible { outline: 2px solid var(--chart); outline-offset: 2px; }
 .go { background: var(--red); color: var(--paper); flex: 1; min-height: 44px; }
 .go.send { background: #3d6bff; }
+.go.send.wait {
+  background: transparent;
+  color: var(--mute);
+  border: 1px solid var(--line);
+}
+.go.send.wait:focus-visible { outline: 2px solid var(--chart); outline-offset: 2px; }
 .go:disabled { opacity: .45; cursor: not-allowed; }
 .ghost { background: transparent; color: var(--paper); border: 1px solid var(--line); }
 #matches { margin-top: 4px; }
