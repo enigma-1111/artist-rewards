@@ -132,9 +132,7 @@
       if (!el) return;
       var n = box.querySelectorAll(".face").length;
       var extra = draw.fresh ? " · " + Math.min(draw.fresh, n) + " new" : " · shuffle";
-      el.textContent = kind === "collection"
-        ? n + " on screen · " + draw.poolSize + " in pool · culture map" + extra
-        : n + " on screen · " + draw.poolSize + " in pool" + extra;
+      el.textContent = n + " on screen · " + draw.poolSize + " in pool · culture map" + extra;
     }
     function add(row) {
       if (!row || !row.img) return;
