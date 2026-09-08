@@ -9,5 +9,6 @@
   "payout": "Both",
   "feesToHolders": true,
   "purpose": "Tip artists. Holders earn trading fees in ART and WETH.",
-  "bankr": "@bankrbot send 500 ART to @handle on robinhood chain"
+  "bankr": "@bankrbot send 500 ART to @handle on robinhood chain",
+  "mcp": "https://art-rewards.vercel.app/api/mcp"
 }
