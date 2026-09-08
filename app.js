@@ -390,15 +390,68 @@ if (amt) {
   amt.addEventListener("blur", () => commitAmount(amt.value));
 }
 if ($("nft")) $("nft").addEventListener("change", () => lookupNft());
-if ($("copy")) $("copy").addEventListener("click", async () => {
-  const line = commitAmount(amt && amt.value);
-  try {
-    await navigator.clipboard.writeText(line);
-    setStatus("Copied. Paste into Bankr or tweet at @bankrbot.", "ok");
-  } catch {
-    setStatus("Copy failed \u2014 select the prompt and copy it yourself.", "warn");
+function selectPromptText(el) {
+  if (!el) return;
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  if (!sel) return;
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+async function copyLine(text) {
+  const line = String(text || "");
+  if (!line) return false;
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(line);
+      return true;
+    } catch (e) {}
   }
-});
+  const ta = document.createElement("textarea");
+  ta.value = line;
+  ta.setAttribute("readonly", "");
+  ta.setAttribute("aria-hidden", "true");
+  ta.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;border:0;padding:0;margin:0;";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, line.length);
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  return ok;
+}
+function flashCopyBtn(btn, label) {
+  if (!btn) return;
+  const prev = btn.getAttribute("data-label") || btn.textContent;
+  btn.setAttribute("data-label", prev);
+  btn.textContent = label;
+  window.clearTimeout(btn._copyT);
+  btn._copyT = window.setTimeout(function () {
+    btn.textContent = btn.getAttribute("data-label") || prev;
+  }, 1800);
+}
+async function copyBankr() {
+  const line = commitAmount(amt && amt.value);
+  const ok = await copyLine(line);
+  if (promptEl) promptEl.classList.toggle("copied", !!ok);
+  if (ok) {
+    flashCopyBtn($("copy"), "Copied");
+    setStatus("Copied. Paste into Bankr or tweet at @bankrbot.", "ok");
+  } else {
+    selectPromptText(promptEl);
+    setStatus("Clipboard blocked on this phone. Prompt is selected \u2014 long-press and Copy.", "warn");
+  }
+  return ok;
+}
+if ($("copy")) $("copy").addEventListener("click", function () { copyBankr(); });
+if (promptEl) {
+  promptEl.addEventListener("click", function () { copyBankr(); });
+  promptEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); copyBankr(); }
+  });
+}
 if (window.ethereum) {
   window.ethereum.request({ method: "eth_accounts" }).then((accs) => {
     if (accs && accs[0]) {
