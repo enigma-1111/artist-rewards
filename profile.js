@@ -45,8 +45,80 @@
     return a ? a.slice(0, 6) + "\u2026" + a.slice(-4) : "";
   }
 
-  function promptLine(h) {
-    return "@bankrbot send 500 ART to @" + (h || "handle") + " on robinhood chain";
+  function liveHandle() {
+    var x = $("profX");
+    var typed = normHandle(x ? x.value : "");
+    if (typed) return typed;
+    return handleOf(load());
+  }
+
+  function amountKey(raw) {
+    var t = String(raw || "").trim();
+    if (!t) return "";
+    if (/^\$/.test(t) || /\bof\s+ART\b/i.test(t)) {
+      var d = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+      return d ? "$" + d[1] : t.toLowerCase();
+    }
+    var n = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+    return n ? n[1] : t.toLowerCase();
+  }
+
+  function normalizeAmount(raw) {
+    var t = String(raw || "").trim();
+    if (!t) return "500 ART";
+    if (/^\$/.test(t) || /\bof\s+ART\b/i.test(t)) {
+      var d = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+      return "$" + (d ? d[1] : "5") + " of ART";
+    }
+    var n = t.replace(/,/g, "").match(/([0-9]+(?:\.[0-9]+)?)/);
+    return n ? n[1] + " ART" : "500 ART";
+  }
+
+  function liveAmount() {
+    var p = load();
+    return normalizeAmount(p.amt || "500 ART");
+  }
+
+  function syncProfChips(canonical) {
+    var box = $("profChips");
+    if (!box) return;
+    var key = amountKey(canonical);
+    var nodes = box.querySelectorAll(".amt");
+    for (var i = 0; i < nodes.length; i++) {
+      var x = nodes[i];
+      var on = amountKey(x.getAttribute("data-v")) === key;
+      x.classList.toggle("on", on);
+      x.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+  }
+
+  function promptLine(h, amt) {
+    var amount = normalizeAmount(amt || "500 ART");
+    if (!h) return "@bankrbot send " + amount + " to @yourhandle on robinhood chain";
+    return "@bankrbot send " + amount + " to @" + h + " on robinhood chain";
+  }
+
+  function writePrompt() {
+    var pr = $("profPrompt");
+    var h = liveHandle();
+    var amt = liveAmount();
+    var line = promptLine(h, amt);
+    if (pr) {
+      pr.textContent = line;
+      pr.setAttribute("data-ready", h ? "1" : "0");
+      pr.setAttribute("data-handle", h || "");
+      pr.classList.toggle("wait", !h);
+      pr.classList.remove("copied");
+      pr.title = h ? "Tap to copy" : "Add a handle to build the prompt";
+    }
+    syncProfChips(amt);
+    var lead = $("profPromptLead");
+    if (lead) {
+      lead.textContent = h
+        ? "Preview tips @" + h + ". This is your profile handle, not a tip-page artist."
+        : "Uses the X handle on this page. Not a leftover tip-page artist.";
+    }
+    return line;
   }
 
   function whenSaved(ts) {
@@ -90,7 +162,7 @@
     var h = handleOf(p);
     var w = $("profWallet"), x = $("profX"), os = $("profOs");
     var rec = $("profReceived"), face = $("profFace");
-    var name = $("profName"), sub = $("profSub"), pr = $("profPrompt");
+    var name = $("profName"), sub = $("profSub");
     if (w && document.activeElement !== w) w.value = p.wallet || "";
     if (x && document.activeElement !== x) x.value = h ? "@" + h : "";
     if (os && document.activeElement !== os) os.value = p.os || "";
@@ -105,7 +177,7 @@
       else if (p.os) sub.textContent = "Site saved. Add a handle so people can tip you";
       else sub.textContent = "Add a handle so people can tip you";
     }
-    if (pr) pr.textContent = promptLine(h);
+    writePrompt();
     paintFace(face, h);
     if (h || p.wallet) {
       var recv = face && face.parentElement;
@@ -137,6 +209,7 @@
     p.x = h;
     p.wallet = w;
     p.os = site;
+    p.amt = liveAmount();
     p.savedAt = Date.now();
     saveStore(p);
     if (xEl && document.activeElement !== xEl) xEl.value = h ? "@" + h : "";
@@ -169,6 +242,18 @@
     var el = $(id);
     if (!el) return;
     el.addEventListener("change", function () { grab(); });
+    el.addEventListener("input", function () {
+      if (id === "profX") {
+        var name = $("profName");
+        var sub = $("profSub");
+        var h = liveHandle();
+        if (name && document.activeElement === el) name.textContent = h ? "@" + h : "Not set";
+        if (sub && document.activeElement === el) {
+          sub.textContent = h ? "Bankr can send to this handle" : "Add a handle so people can tip you";
+        }
+        writePrompt();
+      }
+    });
     el.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -177,6 +262,18 @@
       }
     });
   });
+
+  var chips = $("profChips");
+  if (chips) {
+    chips.addEventListener("click", function (e) {
+      var b = e.target.closest(".amt");
+      if (!b) return;
+      var p = load();
+      p.amt = normalizeAmount(b.getAttribute("data-v"));
+      saveStore(p);
+      writePrompt();
+    });
+  }
 
   if ($("profSave")) $("profSave").addEventListener("click", function () { grab(); });
 
@@ -224,7 +321,14 @@
   async function copyProfPrompt() {
     var pr = $("profPrompt");
     var btn = $("profCopy");
-    var line = (pr && pr.textContent) || "";
+    var h = liveHandle();
+    if (!h) {
+      setCopyStatus("Save an X handle first. Preview will not copy @artist or a blank target.", "warn");
+      var x = $("profX");
+      if (x) x.focus();
+      return;
+    }
+    var line = writePrompt();
     var ok = await copyLine(line);
     if (pr) pr.classList.toggle("copied", !!ok);
     if (ok) {

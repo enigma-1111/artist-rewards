@@ -51,11 +51,18 @@
 
     <section class="card" style="margin-top:14px">
       <label>Bankr prompt people can copy</label>
-      <div class="prompt" id="profPrompt" role="button" tabindex="0" title="Tap to copy">@bankrbot send 500 ART to @handle on robinhood chain</div>
+      <p class="hint" id="profPromptLead">Uses the X handle on this page. Not a leftover tip-page artist.</p>
+      <div class="row" id="profChips" role="group" aria-label="Preview amount">
+        <button type="button" class="amt" data-v="100 ART" aria-pressed="false">100 ART</button>
+        <button type="button" class="amt on" data-v="500 ART" aria-pressed="true">500 ART</button>
+        <button type="button" class="amt" data-v="1000 ART" aria-pressed="false">1,000 ART</button>
+        <button type="button" class="amt" data-v="$5 of ART" aria-pressed="false">$5 of ART</button>
+      </div>
+      <div class="prompt wait" id="profPrompt" role="button" tabindex="0" title="Add a handle to build the prompt" data-ready="0">@bankrbot send 500 ART to @yourhandle on robinhood chain</div>
       <div class="row">
         <button class="go" id="profCopy" type="button">Copy prompt</button>
       </div>
-      <p class="hint" id="profCopyStatus" aria-live="polite">Tap Copy, or tap the prompt. Paste into Bankr.</p>
+      <p class="hint" id="profCopyStatus" aria-live="polite">Add your X handle above. Preview updates from that handle, not @artist.</p>
     </section>
 
     <section class="card" style="margin-top:14px">
