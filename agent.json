@@ -8,7 +8,7 @@
   "pair": "WETH",
   "payout": "Both",
   "feesToHolders": true,
-  "purpose": "Tip artists. Holders earn trading fees in ART and WETH.",
+  "purpose": "Tip a handle with ART. Culture map only — not affiliated with any listed artist or collection. Holders earn trading fees in ART and WETH.",
   "bankr": "@bankrbot send 500 ART to @handle on robinhood chain",
   "mcp": "https://art-rewards.vercel.app/api/mcp"
 }
