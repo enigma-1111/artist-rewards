@@ -274,3 +274,47 @@ footer a { color: inherit; }
 .tiny { padding: 6px 10px; font-size: 12px; border-radius: 999px; }
 .face .ph { width: 100%; height: 100%; border-radius: 8px; }
 .recv-face .ph { width: 56px; height: 56px; border-radius: 14px; }
+.soon-card .soon-badge {
+  color: var(--chart);
+  border-color: rgba(230,255,99,.45);
+  margin: 0;
+}
+.soon-slot {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 4px 0 2px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.soon-frame {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  border: 1px dashed var(--line);
+  background: #160e0c;
+  flex: none;
+  overflow: hidden;
+}
+.soon-frame .ph {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  opacity: .9;
+}
+.soon-slot strong { display: block; font-size: 15px; }
+.soon-slot span {
+  display: block;
+  color: var(--mute);
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+#soonPin[aria-disabled="true"] {
+  color: var(--mute);
+  cursor: default;
+}
+#soonPin:focus-visible {
+  outline: 2px solid var(--chart);
+  outline-offset: 2px;
+}
+#soonNote { min-height: 1.4em; }
