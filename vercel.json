@@ -2,10 +2,27 @@
   "rewrites": [{ "source": "/mcp", "destination": "/api/mcp" }],
   "headers": [
     {
+      "source": "/catalog.json",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS" },
+        { "key": "Cache-Control", "value": "public, max-age=60, stale-while-revalidate=600" },
+        { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/api/catalog",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS" },
+        { "key": "Cache-Control", "value": "public, max-age=60, stale-while-revalidate=600" }
+      ]
+    },
+    {
       "source": "/api/mcp",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, HEAD, POST, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "content-type, accept, mcp-session-id, mcp-protocol-version" }
       ]
     },
@@ -13,7 +30,7 @@
       "source": "/mcp",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, HEAD, POST, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "content-type, accept, mcp-session-id, mcp-protocol-version" }
       ]
     }
