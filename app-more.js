@@ -60,7 +60,10 @@ function toUnits(amount) {
   return BigInt(w + frac).toString(16);
 }
 function tokenIsLive() {
-  return /^0x[a-fA-F0-9]{40}$/.test(String(CONFIG.contract || "").trim());
+  var c = String(CONFIG.contract || "").trim();
+  if (!/^0x[a-fA-F0-9]{40}$/.test(c)) return false;
+  if (c.toLowerCase() === "0xa5bc127b167bd5b89e161838799b1bddfd0697c4") return false;
+  return true;
 }
 function syncSendBtn() {
   if (!sendBtn) return;
