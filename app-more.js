@@ -84,7 +84,7 @@ async function sendArt() {
     const ok = typeof copyBankr === "function" ? await copyBankr() : false;
     setStatus(
       ok
-        ? "On-site send waits for the live token. Prompt copied \u2014 paste into Bankr."
+        ? "On-site send waits for the live token. Prompt copied — paste into Bankr."
         : "On-site send waits for the live token. Copy the Bankr prompt instead.",
       "warn"
     );
@@ -168,7 +168,7 @@ async function lookupNft(raw) {
     return;
   }
   if (parsed.kind === "collection") {
-    nftMiss("That\u2019s a collection page. Paste one item (\u2026/assets/\u2026/token id) to find the holder.");
+    nftMiss("That’s a collection page. Paste one item (…/assets/…/token id) to find the holder.");
     return;
   }
   const seq = (window.__nftLook = (window.__nftLook || 0) + 1);
@@ -202,14 +202,14 @@ function paintToken() {
     links.innerHTML = "";
   }
 }
-/* Connect tap belongs to connect.js wallet sheet \u2014 do not inject here. */
- if (sendBtn) sendBtn.addEventListener("click", sendArt);
- if ($("chips")) $("chips").addEventListener("click", (e) => {
+/* Connect tap belongs to connect.js wallet sheet — do not inject here. */
+if (sendBtn) sendBtn.addEventListener("click", sendArt);
+if ($("chips")) $("chips").addEventListener("click", (e) => {
   const b = e.target.closest(".amt");
   if (!b) return;
   commitAmount(b.getAttribute("data-v"));
 });
- if (who) {
+if (who) {
   who.addEventListener("input", function () { renderMatches(who.value); });
   who.addEventListener("keydown", function (e) {
     const cards = window.__cards || [];
@@ -240,7 +240,7 @@ function paintToken() {
     }, 180);
   });
 }
- if (amt) {
+if (amt) {
   amt.addEventListener("input", writePrompt);
   amt.addEventListener("change", () => commitAmount(amt.value));
   amt.addEventListener("blur", () => commitAmount(amt.value));
@@ -307,8 +307,20 @@ function flashCopyBtn(btn, label) {
     btn.textContent = btn.getAttribute("data-label") || prev;
   }, 1800);
 }
+function promptIsPlaceholder(line) {
+  const t = String(line || "");
+  return /to\s+@(artist|yourhandle|handle)\b/i.test(t) || !/to\s+(@[A-Za-z0-9_]{1,30}|0x[a-fA-F0-9]{40})\b/.test(t);
+}
 async function copyBankr() {
+  const to = typeof recipient === "function" ? recipient() : "";
   const line = commitAmount(amt && amt.value);
+  if (!to || !line || promptIsPlaceholder(line)) {
+    if (promptEl) promptEl.classList.remove("copied");
+    setStatus("Pick a still or type a real @handle first. Will not copy leftover @artist.", "warn");
+    const recv = $("recv");
+    if (recv) recv.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return false;
+  }
   const ok = await copyLine(line);
   if (promptEl) promptEl.classList.toggle("copied", !!ok);
   if (ok) {
