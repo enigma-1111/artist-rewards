@@ -32,13 +32,8 @@
       if (typeof copyBankr === "function") {
         try { ok = await copyBankr(); } catch (err) { ok = false; }
       }
-      if (typeof setStatus === "function") {
-        setStatus(
-          ok
-            ? "On-site send waits for the live token. Prompt copied — paste into Bankr."
-            : "On-site send waits for the live token. Copy the Bankr prompt instead.",
-          "warn"
-        );
+      if (ok && typeof setStatus === "function") {
+        setStatus("On-site send waits for the live token. Prompt copied — paste into Bankr.", "warn");
       }
     });
   }

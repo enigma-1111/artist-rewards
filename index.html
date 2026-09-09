@@ -73,12 +73,12 @@
         <button type="button" class="amt" data-v="$5 of ART" aria-pressed="false">$5 of ART</button>
       </div>
       <input id="amt" value="500 ART" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="prompt" style="margin-top:10px" />
-      <div class="prompt" id="prompt" role="button" tabindex="0" title="Tap to copy">@bankrbot send 500 ART to @artist on robinhood chain</div>
+      <div class="prompt wait" id="prompt" role="button" tabindex="0" title="Pick a receiver first" data-ready="0">@bankrbot send 500 ART to @handle on robinhood chain</div>
       <div class="row" style="margin-top:12px">
         <button class="go" id="copy" type="button">Copy Bankr prompt</button>
         <button class="go send wait" id="send" type="button" aria-disabled="true" title="On-site send waits for the live token">Send later</button>
       </div>
-      <p class="hint" id="status" aria-live="polite">Token is not live yet. Copy the Bankr prompt. On-site Send waits for the pools.fun 0x — not a ScanHood listing named Robinhood ART.</p>
+      <p class="hint" id="status" aria-live="polite">Token is not live yet. Tap a still or type a real @handle before Copy — will not send leftover @artist. On-site Send waits for the pools.fun 0x — not a ScanHood listing named Robinhood ART.</p>
     </section>
 
     <section class="card" style="margin-top:14px">
