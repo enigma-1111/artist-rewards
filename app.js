@@ -2,6 +2,7 @@ const CONFIG = {
   name: "Artist Rewards Token",
   ticker: "ART",
   contract: "",
+  lookalike: "0xa5bc127b167bD5B89E161838799B1bDdfD0697c4",
   x: "nft_art",
   pair: "WETH",
   payout: "Both",
@@ -12,6 +13,10 @@ const CONFIG = {
   explorer: "https://explorer.robinhood.com",
   decimals: 18
 };
+
+if (String(CONFIG.contract || "").toLowerCase() === String(CONFIG.lookalike || "").toLowerCase()) {
+  CONFIG.contract = "";
+}
 
 const $ = (id) => document.getElementById(id);
 const who = $("who");
@@ -125,7 +130,7 @@ function paintRecv() {
 }
 function esc(s) {
   return String(s || "").replace(/[&<>"']/g, function (c) {
-    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    return ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" })[c];
   });
 }
 function cardHTML(id, title, sub, extra, img) {
