@@ -77,7 +77,7 @@ function parseNft(raw) {
   if (m) return { kind: "item", chain: "ethereum", contract: m[1], tokenId: m[2] };
   m = path.match(/opensea\.io\/collection\/([a-z0-9._-]+)/i);
   if (m) return { kind: "collection", slug: m[1] };
-  if (/opensea\.io/i.test(t)) return { kind: "unknown", hint: "Need the item page \u2014 collection or profile links have no holder." };
+  if (/opensea\.io/i.test(t)) return { kind: "unknown", hint: "Need the item page — collection or profile links have no holder." };
   return { kind: "unknown", hint: "Need an OpenSea item link or contract / token id." };
 }
 function stillFor(handle) {
@@ -130,7 +130,7 @@ function paintRecv() {
 }
 function esc(s) {
   return String(s || "").replace(/[&<>"']/g, function (c) {
-    return ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" })[c];
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
   });
 }
 function cardHTML(id, title, sub, extra, img) {
@@ -308,10 +308,17 @@ function select(id, opts) {
       : "Receiver set to " + (picked.name || "@" + picked.handle) + ". Copy the Bankr prompt.";
   }
 }
+function isPlaceholderHandle(h) {
+  return /^(artist|yourhandle|handle)$/i.test(String(h || "").replace(/^@/, ""));
+}
 function recipient() {
   if (picked.kind === "addr" && picked.address) return picked.address;
-  if (picked.handle) return "@" + String(picked.handle).replace(/^@/, "");
-  return "@artist";
+  if (picked.handle) {
+    var h = String(picked.handle).replace(/^@/, "");
+    if (!h || isPlaceholderHandle(h)) return "";
+    return "@" + h;
+  }
+  return "";
 }
 function amountKey(raw) {
   const t = String(raw || "").trim();
@@ -346,10 +353,15 @@ function syncChips(canonical) {
 function writePrompt() {
   if (!promptEl) return "";
   const amount = normalizeAmount((amt && amt.value) || "500 ART");
-  const line = "@bankrbot send " + amount + " to " + recipient() + " on robinhood chain";
+  const to = recipient();
+  const ready = !!to;
+  const line = "@bankrbot send " + amount + " to " + (to || "@handle") + " on robinhood chain";
   promptEl.textContent = line;
+  promptEl.setAttribute("data-ready", ready ? "1" : "0");
+  promptEl.classList.toggle("wait", !ready);
+  promptEl.title = ready ? "Tap to copy" : "Pick a receiver first";
   syncChips(amount);
-  return line;
+  return ready ? line : "";
 }
 function commitAmount(raw) {
   const amount = normalizeAmount(raw);
