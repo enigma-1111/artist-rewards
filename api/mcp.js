@@ -9,6 +9,7 @@ const STATUS = {
   site: SITE,
   profile: SITE + "/profile.html",
   catalog: SITE + "/catalog.json",
+  catalogApi: SITE + "/api/catalog",
   github: "https://github.com/enigma-1111/artist-rewards",
   x: "nft_art",
   contract: "",
@@ -29,16 +30,26 @@ const STATUS = {
 };
 
 async function liveCatalog() {
-  try {
-    const r = await fetch(SITE + "/catalog.json", { cache: "no-store" });
-    if (!r.ok) return null;
-    const d = await r.json();
-    const artists = Array.isArray(d.artists) ? d.artists : [];
-    const collections = Array.isArray(d.collections) ? d.collections : [];
-    return { artists, collections, note: d.note || "" };
-  } catch (err) {
-    return null;
+  const urls = [SITE + "/catalog.json", SITE + "/api/catalog"];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) continue;
+      const d = await r.json();
+      const artists = Array.isArray(d.artists) ? d.artists : [];
+      const collections = Array.isArray(d.collections) ? d.collections : [];
+      return {
+        artists,
+        collections,
+        note: d.note || "",
+        catalogHttp: r.status,
+        catalogUrl: url,
+      };
+    } catch (err) {
+      continue;
+    }
   }
+  return null;
 }
 
 function catalogRows(list) {
@@ -375,12 +386,16 @@ async function callTool(name, args) {
       contract: "",
       catalogArtists: cat ? cat.artists.length : null,
       catalogCollections: cat ? cat.collections.length : null,
+      catalogHttp: cat ? cat.catalogHttp : 0,
+      catalogUrl: cat ? cat.catalogUrl : STATUS.catalog,
+      catalogOk: !!(cat && cat.artists.length && cat.collections.length),
       faceMap: rows().length,
       lookalikeWarning: STATUS.lookalike,
       tools: TOOLS.map((t) => t.name),
       calls: {
         status: SITE + "/api/mcp?tool=get_art_status",
-        artists: SITE + "/api/mcp?tool=list_artists&q=beeple",
+        artists: SITE + "/api/mcp?tool=list_artists&q=pudgypenguins",
+        artistsFace: SITE + "/api/mcp?tool=list_artists&q=beeple",
         bankr: SITE + "/api/mcp?tool=build_bankr_prompt&handle=beeple&amount=500%20ART",
       },
     };
@@ -392,14 +407,16 @@ async function callTool(name, args) {
       const cat = await liveCatalog();
       if (cat && cat.artists.length) {
         const list = matchQ(catalogRows(cat.artists), q);
-        return { count: list.length, artists: list, affiliation: "none", source: "catalog.json", q: q || null };
+        if (list.length || !q) {
+          return { count: list.length, artists: list, affiliation: "none", source: "catalog.json", q: q || null };
+        }
       }
     }
     const list = matchQ(
       rows().filter((r) => want === "all" || r.face === want),
       q
     );
-    return { count: list.length, artists: list, source: "face-map", q: q || null };
+    return { count: list.length, artists: list, affiliation: "none", source: "face-map", q: q || null };
   }
   if (name === "list_initials") {
     const list = rows().filter((r) => r.face === "initials");
@@ -469,7 +486,17 @@ async function callTool(name, args) {
     const path = raw.split(/[?#]/)[0];
     const itemChain = path.match(/opensea\.io\/(?:assets|item)\/([^/]+)\/(0x[a-fA-F0-9]{40})\/(\d+|0x[a-fA-F0-9]+)/i);
     if (itemChain) {
-      return { kind: "item", chain: itemChain[1], contract: itemChain[2], tokenId: itemChain[3] };
+      const hit = {
+        kind: "item",
+        chain: itemChain[1],
+        contract: itemChain[2],
+        tokenId: itemChain[3],
+      };
+      if (String(hit.contract).toLowerCase() === LOOKALIKE) {
+        hit.lookalike = true;
+        hit.hint = "This contract is ScanHood token Robinhood ART, not Artist Rewards.";
+      }
+      return hit;
     }
     const itemLegacy = path.match(/opensea\.io\/(?:assets|item)\/(0x[a-fA-F0-9]{40})\/(\d+|0x[a-fA-F0-9]+)/i);
     if (itemLegacy) {
@@ -559,15 +586,21 @@ async function handleRpc(msg) {
 
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "content-type, accept, mcp-session-id, mcp-protocol-version");
   res.setHeader("Access-Control-Expose-Headers", "mcp-session-id");
+  res.setHeader("Allow", "GET, HEAD, POST, OPTIONS");
 }
 
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
+    return res.end();
+  }
+  if (req.method === "HEAD") {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     return res.end();
   }
   if (req.method === "GET") {
@@ -592,7 +625,8 @@ module.exports = async function handler(req, res) {
       tools: TOOLS.map((t) => t.name),
       calls: {
         status: SITE + "/api/mcp?tool=get_art_status",
-        artists: SITE + "/api/mcp?tool=list_artists&q=beeple",
+        artists: SITE + "/api/mcp?tool=list_artists&q=pudgypenguins",
+        artistsFace: SITE + "/api/mcp?tool=list_artists&q=beeple",
         bankr: SITE + "/api/mcp?tool=build_bankr_prompt&handle=beeple&amount=500%20ART",
       },
       status: {
@@ -600,6 +634,9 @@ module.exports = async function handler(req, res) {
         contract: "",
         catalogArtists: cat ? cat.artists.length : null,
         catalogCollections: cat ? cat.collections.length : null,
+        catalogHttp: cat ? cat.catalogHttp : 0,
+        catalogUrl: cat ? cat.catalogUrl : STATUS.catalog,
+        catalogOk: !!(cat && cat.artists.length && cat.collections.length),
       },
     });
   }
