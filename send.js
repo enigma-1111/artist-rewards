@@ -2,7 +2,10 @@
   function $(id) { return document.getElementById(id); }
   function live() {
     var cfg = typeof CONFIG !== "undefined" ? CONFIG : {};
-    return /^0x[a-fA-F0-9]{40}$/.test(String(cfg.contract || "").trim());
+    var c = String(cfg.contract || "").trim();
+    if (!/^0x[a-fA-F0-9]{40}$/.test(c)) return false;
+    if (c.toLowerCase() === "0xa5bc127b167bd5b89e161838799b1bddfd0697c4") return false;
+    return true;
   }
   function bind() {
     var btn = $("send");

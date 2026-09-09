@@ -28,6 +28,7 @@ module.exports = async function handler(req, res) {
     catalogArtists: artists,
     catalogCollections: collections,
     contract: "",
-    note: "Static catalog.json plus /api/catalog. Contract empty until the human pastes a 0x.",
+    lookalike: "ScanHood ticker ART at 0xa5bc127b167bD5B89E161838799B1bDdfD0697c4 is Robinhood ART, not this token.",
+    note: "Static catalog.json plus /api/catalog. Contract empty until the human pastes a 0x. Do not paste the ScanHood lookalike.",
   });
 };

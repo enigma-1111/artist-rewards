@@ -28,7 +28,8 @@
   "calls": {
     "status": "https://art-rewards.vercel.app/api/mcp?tool=get_art_status",
     "artists": "https://art-rewards.vercel.app/api/mcp?tool=list_artists&q=beeple",
-    "bankr": "https://art-rewards.vercel.app/api/mcp?tool=build_bankr_prompt&handle=beeple&amount=500%20ART"
+    "bankr": "https://art-rewards.vercel.app/api/mcp?tool=build_bankr_prompt&handle=beeple&amount=500%20ART",
+    "validate": "https://art-rewards.vercel.app/api/mcp?tool=validate_contract&address=0xa5bc127b167bD5B89E161838799B1bDdfD0697c4"
   },
   "pages": ["/", "/profile.html"],
   "affiliation": "none",
