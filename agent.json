@@ -5,6 +5,7 @@
   "profile": "https://art-rewards.vercel.app/profile.html",
   "catalog": "https://art-rewards.vercel.app/catalog.json",
   "catalogApi": "https://art-rewards.vercel.app/api/catalog",
+  "health": "https://art-rewards.vercel.app/api/health",
   "github": "https://github.com/enigma-1111/artist-rewards",
   "x": "nft_art",
   "contract": "",

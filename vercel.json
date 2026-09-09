@@ -11,6 +11,13 @@
       ]
     },
     {
+      "source": "/api/health",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS" }
+      ]
+    },
+    {
       "source": "/api/catalog",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
